@@ -13,13 +13,11 @@ export default function WaiterLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-
     if (res.ok) {
       router.push("/waiter");
     } else {
@@ -30,48 +28,62 @@ export default function WaiterLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-800 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Garson Girişi</h1>
-          <p className="text-slate-500 text-sm mt-1">Kullanıcı adı ve şifrenizle giriş yapın</p>
+    <div className="felt-bg min-h-screen flex items-center justify-center px-4">
+      {/* Dekoratif köşeler */}
+      <div className="absolute top-6 left-6 text-3xl" style={{ color: "rgba(201,168,76,0.2)" }}>♠</div>
+      <div className="absolute top-6 right-6 text-3xl" style={{ color: "rgba(201,168,76,0.2)" }}>♥</div>
+      <div className="absolute bottom-6 left-6 text-3xl" style={{ color: "rgba(201,168,76,0.2)" }}>♦</div>
+      <div className="absolute bottom-6 right-6 text-3xl" style={{ color: "rgba(201,168,76,0.2)" }}>♣</div>
+
+      <div className="w-full max-w-sm fade-in">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <p className="text-5xl mb-2" style={{ color: "#c9a84c" }}>♠</p>
+          <h1 className="text-2xl font-bold" style={{ color: "#c9a84c" }}>Garson Girişi</h1>
+          <p className="text-sm text-gray-400 mt-1">Kullanıcı adı ve şifrenizle giriş yapın</p>
         </div>
 
-        <form onSubmit={login} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
-            <input
-              type="text"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="kullanici_adi"
-              required
-            />
+        <form onSubmit={login} className="rounded-2xl overflow-hidden"
+          style={{ background: "#132e1e", border: "1px solid rgba(201,168,76,0.35)" }}>
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: "#c9a84c" }}>Kullanıcı Adı</label>
+              <input
+                type="text"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none"
+                style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,168,76,0.25)" }}
+                placeholder="kullanici_adi"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: "#c9a84c" }}>Şifre</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="w-full rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none"
+                style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,168,76,0.25)" }}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-red-400 text-sm text-center bg-red-900/30 rounded-lg py-2">{error}</p>
+            )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="••••••••"
-              required
-            />
+          <div className="px-6 pb-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-xl font-bold text-base transition-opacity disabled:opacity-50"
+              style={{ background: "#c9a84c", color: "#0a2015" }}
+            >
+              {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+            </button>
           </div>
-
-          {error && (
-            <p className="text-red-500 text-sm text-center bg-red-50 rounded-lg py-2">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-base"
-          >
-            {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-          </button>
         </form>
       </div>
     </div>
