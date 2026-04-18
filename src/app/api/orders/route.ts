@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -7,7 +8,10 @@ export async function GET(req: Request) {
   const tableId = searchParams.get("tableId");
 
   const where: Record<string, unknown> = {};
-  if (status) where.status = status;
+  if (status) {
+    const statuses = status.split(",");
+    where.status = statuses.length > 1 ? { in: statuses } : statuses[0];
+  }
   if (tableId) where.tableId = Number(tableId);
 
   const orders = await prisma.order.findMany({
@@ -15,6 +19,7 @@ export async function GET(req: Request) {
     orderBy: { createdAt: "desc" },
     include: {
       table: true,
+      waiter: { select: { id: true, name: true } },
       items: { include: { product: true } },
     },
   });
@@ -23,6 +28,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const { tableId, items, note } = await req.json();
+
+  const cookieStore = await cookies();
+  const waiterId = cookieStore.get("waiter_id")?.value;
 
   const total = items.reduce(
     (sum: number, item: { unitPrice: number; quantity: number }) =>
@@ -35,6 +43,7 @@ export async function POST(req: Request) {
       tableId,
       note,
       total,
+      waiterId: waiterId ? Number(waiterId) : null,
       items: {
         create: items.map((item: { productId: number; quantity: number; unitPrice: number }) => ({
           productId: item.productId,

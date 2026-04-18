@@ -34,10 +34,20 @@ model Product {
   orderItems  OrderItem[]
 }
 
+model Waiter {
+  id       Int     @id @default(autoincrement())
+  name     String
+  username String  @unique
+  password String
+  orders   Order[]
+}
+
 model Order {
   id        Int         @id @default(autoincrement())
   tableId   Int
   table     Table       @relation(fields: [tableId], references: [id])
+  waiterId  Int?
+  waiter    Waiter?     @relation(fields: [waiterId], references: [id])
   status    OrderStatus @default(PENDING)
   note      String?
   total     Float       @default(0)

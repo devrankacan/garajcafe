@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
+type Waiter = { id: number; name: string };
 type Table = { id: number; number: number; name: string; status: string };
 type Product = { id: number; name: string; price: number; description?: string };
 type Category = { id: number; name: string; products: Product[] };
 type CartItem = { product: Product; quantity: number };
 
 export default function WaiterPage() {
+  const router = useRouter();
+  const [waiter, setWaiter] = useState<Waiter | null>(null);
   const [tables, setTables] = useState<Table[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
@@ -17,14 +21,32 @@ export default function WaiterPage() {
   const [step, setStep] = useState<"table" | "menu" | "cart">("table");
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
+    fetch("/api/auth/me").then((r) => r.json()).then((data) => {
+      if (!data) {
+        router.replace("/waiter/login");
+      } else {
+        setWaiter(data);
+        setAuthChecked(true);
+      }
+    });
+  }, [router]);
+
+  useEffect(() => {
+    if (!authChecked) return;
     fetch("/api/tables").then((r) => r.json()).then(setTables);
     fetch("/api/categories").then((r) => r.json()).then((cats) => {
       setCategories(cats);
       if (cats.length > 0) setActiveCategory(cats[0].id);
     });
-  }, []);
+  }, [authChecked]);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/waiter/login");
+  }
 
   function addToCart(product: Product) {
     setCart((prev) => {
@@ -83,13 +105,23 @@ export default function WaiterPage() {
   const statusLabel = (s: string) =>
     s === "EMPTY" ? "Boş" : s === "OCCUPIED" ? "Dolu" : "Açık";
 
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-800">
+        <p className="text-white animate-pulse">Yükleniyor...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
       <header className="bg-slate-800 text-white px-4 py-3 shadow">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <h1 className="text-lg font-bold">Garson Paneli</h1>
-          <div className="flex gap-2">
+          <div>
+            <h1 className="text-lg font-bold">Garson Paneli</h1>
+            <p className="text-slate-300 text-xs">{waiter?.name}</p>
+          </div>
+          <div className="flex gap-2 items-center">
             {step !== "table" && (
               <>
                 <button onClick={() => setStep("menu")} className={`px-3 py-1 rounded text-sm ${step === "menu" ? "bg-amber-600" : "bg-slate-600"}`}>Menü</button>
@@ -99,6 +131,7 @@ export default function WaiterPage() {
                 </button>
               </>
             )}
+            <button onClick={logout} className="bg-slate-600 hover:bg-slate-500 px-3 py-1 rounded text-sm">Çıkış</button>
           </div>
         </div>
       </header>
@@ -110,7 +143,6 @@ export default function WaiterPage() {
       )}
 
       <div className="max-w-2xl mx-auto px-4 py-4">
-        {/* Step: Table Selection */}
         {step === "table" && (
           <div>
             <h2 className="text-lg font-semibold text-slate-700 mb-3">Masa Seç</h2>
@@ -130,11 +162,9 @@ export default function WaiterPage() {
           </div>
         )}
 
-        {/* Step: Menu */}
         {step === "menu" && (
           <div>
             <p className="text-slate-600 mb-3 font-medium">Masa: <span className="text-amber-700">{selectedTable?.name}</span></p>
-            {/* Category tabs */}
             <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
               {categories.map((cat) => (
                 <button
@@ -146,7 +176,6 @@ export default function WaiterPage() {
                 </button>
               ))}
             </div>
-            {/* Products */}
             <div className="space-y-2">
               {activeProducts.map((product) => {
                 const inCart = cart.find((i) => i.product.id === product.id);
@@ -178,7 +207,6 @@ export default function WaiterPage() {
           </div>
         )}
 
-        {/* Step: Cart */}
         {step === "cart" && (
           <div>
             <h2 className="text-lg font-semibold text-slate-700 mb-3">Sipariş Özeti — {selectedTable?.name}</h2>
