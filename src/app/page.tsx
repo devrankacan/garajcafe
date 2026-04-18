@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 type Product = { id: number; name: string; description?: string; price: number; imageUrl?: string };
 type Category = { id: number; name: string; products: Product[] };
-type Settings = { businessName?: string; about?: string; wifi?: string; instagram?: string; mapUrl?: string };
+type Settings = { businessName?: string; about?: string; wifi?: string; instagram?: string; mapUrl?: string; logoUrl?: string };
 
 const SUITS = "♠  ♥  ♦  ♣";
 
@@ -46,10 +46,17 @@ export default function MenuPage() {
         <div className="max-w-xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-1">
             <div>
-              <h1 className="text-xl font-bold" style={{ color: "#c9a84c" }}>
-                {settings.businessName ?? "Garaj Cafe"}
-              </h1>
-              <p className="card-suit text-xs" style={{ color: "#c9a84c" }}>{SUITS}</p>
+                <div className="flex items-center gap-3">
+                {settings.logoUrl && (
+                  <img src={settings.logoUrl} alt="logo" className="h-10 w-10 object-contain rounded-lg" />
+                )}
+                <div>
+                  <h1 className="text-xl font-bold" style={{ color: "#c9a84c" }}>
+                    {settings.businessName ?? "Garaj Cafe"}
+                  </h1>
+                  <p className="card-suit text-xs" style={{ color: "#c9a84c" }}>{SUITS}</p>
+                </div>
+              </div>
             </div>
             <div className="relative">
               <button
