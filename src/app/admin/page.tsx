@@ -34,6 +34,13 @@ export default function OrdersPage() {
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Masayı aktar modal
+  const [transferModal, setTransferModal] = useState(false);
+
+  // Kısmi tahsilat modal
+  const [partialModal, setPartialModal] = useState(false);
+  const [partialAmount, setPartialAmount] = useState("");
+
   const fetchAll = useCallback(async () => {
     const [orders, tbls] = await Promise.all([
       fetch("/api/orders?status=PENDING").then((r) => r.json()),
@@ -141,6 +148,46 @@ export default function OrdersPage() {
     fetchAll();
   }
 
+  async function transferTable(targetTable: Table) {
+    if (!tableModal) return;
+    setSaving(true);
+    const openOrders = tableOrders.filter((o) => ["PENDING", "APPROVED"].includes(o.status));
+    await Promise.all(openOrders.map((o) =>
+      fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tableId: targetTable.id }) })
+    ));
+    if (cart.length > 0) {
+      await fetch("/api/orders", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableId: targetTable.id, autoApprove: true, items: cart.map((i) => ({ productId: i.product.id, quantity: i.quantity, unitPrice: i.product.price })) }),
+      });
+    }
+    await fetch(`/api/tables/${tableModal.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "EMPTY" }) });
+    await fetch(`/api/tables/${targetTable.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "OCCUPIED" }) });
+    setTableModal(null); setCart([]); setTransferModal(false);
+    fetchAll();
+    setSaving(false);
+  }
+
+  async function collectPartial() {
+    const amount = parseFloat(partialAmount.replace(",", "."));
+    if (!amount || amount <= 0 || !tableModal) return;
+    setSaving(true);
+    const approved = [...tableOrders.filter((o) => o.status === "APPROVED")].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    let remaining = amount;
+    for (const order of approved) {
+      if (remaining <= 0) break;
+      if (order.total <= remaining + 0.01) {
+        await fetch(`/api/orders/${order.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "CLOSED" }) });
+        remaining -= order.total;
+      }
+    }
+    await refreshTableOrders(tableModal.id);
+    fetchAll();
+    setPartialModal(false);
+    setPartialAmount("");
+    setSaving(false);
+  }
+
   const cartTotal = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
   const savedTotal = tableOrders.filter((o) => o.status === "APPROVED").reduce((s, o) => s + o.total, 0);
   const grandTotal = savedTotal + cartTotal;
@@ -219,8 +266,13 @@ export default function OrdersPage() {
             <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
               style={{ background: "#111", borderBottom: "1px solid rgba(204,21,21,0.25)" }}>
               <h3 className="font-bold text-lg" style={{ color: "#cc1515" }}>{tableModal.name} Adisyonu</h3>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <span className="font-bold text-white text-lg">{grandTotal.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
+                <button onClick={() => setTransferModal(true)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                  style={{ background: "#1d4ed8", color: "#fff" }}>
+                  ⇄ Masayı Aktar
+                </button>
                 <button onClick={() => { setTableModal(null); setCart([]); }}
                   className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10">✕</button>
               </div>
@@ -294,6 +346,11 @@ export default function OrdersPage() {
                       style={{ background: "#1d4ed8" }}>
                       💾 Masaya Kaydet
                     </button>
+                    <button onClick={() => { setPartialAmount(""); setPartialModal(true); }} disabled={grandTotal === 0}
+                      className="col-span-2 py-2 rounded-lg text-xs font-bold text-white disabled:opacity-40"
+                      style={{ background: "#c2410c" }}>
+                      ✂ Kısmi Tahsilat Al
+                    </button>
                     <button onClick={() => closeTableWith("Nakit")} disabled={saving || grandTotal === 0}
                       className="py-2 rounded-lg text-xs font-bold text-white disabled:opacity-40"
                       style={{ background: "#15803d" }}>
@@ -358,6 +415,93 @@ export default function OrdersPage() {
                     <p className="text-gray-500 text-sm text-center py-12">Bu kategoride ürün yok</p>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Masayı Aktar Modal ── */}
+      {transferModal && tableModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="rounded-2xl w-full max-w-xs" style={{ background: "#111", border: "1px solid rgba(29,78,216,0.5)" }}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <h3 className="font-bold text-white">Masayı Aktar</h3>
+              <button onClick={() => setTransferModal(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div className="px-4 py-3">
+              <p className="text-xs text-gray-400 mb-3">
+                <span style={{ color: "#cc1515" }}>{tableModal.name}</span> masasındaki tüm siparişler seçilen masaya taşınacak.
+              </p>
+              <div className="space-y-1.5">
+                {tables.filter((t) => t.id !== tableModal.id).map((t) => {
+                  const st = tableStatusStyle[t.status] ?? tableStatusStyle.EMPTY;
+                  return (
+                    <button key={t.id} onClick={() => transferTable(t)} disabled={saving}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:brightness-125 disabled:opacity-40"
+                      style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <span className="font-semibold text-white text-sm">{t.name}</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.4)", color: st.color }}>{st.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="px-4 pb-4">
+              <button onClick={() => setTransferModal(false)}
+                className="w-full py-2 rounded-xl text-sm text-gray-400 mt-1"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Kısmi Tahsilat Modal ── */}
+      {partialModal && tableModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="rounded-2xl w-full max-w-xs" style={{ background: "#111", border: "1px solid rgba(194,65,12,0.5)" }}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <h3 className="font-bold text-white">Kısmi Tahsilat</h3>
+              <button onClick={() => setPartialModal(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div className="px-5 py-4 space-y-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Toplam Tutar</span>
+                <span className="font-bold text-white">{grandTotal.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: "#c2410c" }}>Tahsil Edilecek Tutar (₺)</label>
+                <input
+                  type="number"
+                  value={partialAmount}
+                  onChange={(e) => setPartialAmount(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full rounded-xl px-4 py-3 text-white text-lg font-bold text-center focus:outline-none"
+                  style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(194,65,12,0.4)" }}
+                  autoFocus
+                />
+              </div>
+              {partialAmount && parseFloat(partialAmount.replace(",", ".")) > 0 && (
+                <div className="flex justify-between text-sm px-1">
+                  <span className="text-gray-400">Kalan Bakiye</span>
+                  <span className="font-bold" style={{ color: "#f87171" }}>
+                    {Math.max(0, grandTotal - parseFloat(partialAmount.replace(",", "."))).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+                  </span>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button onClick={() => setPartialModal(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm text-gray-300"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  İptal
+                </button>
+                <button onClick={collectPartial} disabled={saving || !partialAmount}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
+                  style={{ background: "#c2410c" }}>
+                  {saving ? "İşleniyor..." : "Tahsil Et"}
+                </button>
               </div>
             </div>
           </div>

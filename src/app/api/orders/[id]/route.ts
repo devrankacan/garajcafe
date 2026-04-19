@@ -3,11 +3,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { status } = await req.json();
+  const { status, tableId } = await req.json();
+
+  const data: Record<string, unknown> = {};
+  if (status !== undefined) data.status = status;
+  if (tableId !== undefined) data.tableId = tableId;
 
   const order = await prisma.order.update({
     where: { id: Number(id) },
-    data: { status },
+    data,
     include: { table: true, items: { include: { product: true } } },
   });
 
