@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 
 type Waiter = { id: number; name: string; username: string };
 
+const card = { background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.2)" };
+const inputCls = "w-full rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none";
+const inputStyle = { background: "rgba(0,0,0,0.4)", border: "1px solid rgba(204,21,21,0.25)" };
+const labelStyle = { color: "#cc1515" };
+
 export default function WaitersPage() {
   const [waiters, setWaiters] = useState<Waiter[]>([]);
   const [modal, setModal] = useState(false);
@@ -52,58 +57,74 @@ export default function WaitersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-slate-700">Garsonlar</h2>
+        <h2 className="font-bold text-white">Garsonlar</h2>
         <button
           onClick={() => { setForm({ name: "", username: "", password: "" }); setEditId(null); setModal(true); }}
-          className="bg-amber-700 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
-        >
+          className="px-4 py-2 rounded-lg text-sm font-medium text-white"
+          style={{ background: "#cc1515" }}>
           + Garson Ekle
         </button>
       </div>
 
       <div className="space-y-2">
         {waiters.length === 0 && (
-          <div className="bg-white rounded-xl p-8 text-center text-gray-400 shadow-sm">
+          <div className="rounded-xl p-8 text-center text-gray-500" style={card}>
             Henüz garson eklenmemiş.
           </div>
         )}
         {waiters.map((w) => (
-          <div key={w.id} className="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
+          <div key={w.id} className="rounded-xl p-4 flex items-center justify-between" style={card}>
             <div>
-              <p className="font-semibold text-slate-800">{w.name}</p>
-              <p className="text-xs text-slate-400 mt-0.5">@{w.username}</p>
+              <p className="font-semibold text-white">{w.name}</p>
+              <p className="text-xs text-gray-400 mt-0.5">@{w.username}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => openEdit(w)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-sm">Düzenle</button>
-              <button onClick={() => remove(w.id)} className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm">Sil</button>
+              <button onClick={() => openEdit(w)}
+                className="px-3 py-1.5 rounded-lg text-sm text-gray-300 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                Düzenle
+              </button>
+              <button onClick={() => remove(w.id)}
+                className="px-3 py-1.5 rounded-lg text-sm text-red-400 hover:text-red-300"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                Sil
+              </button>
             </div>
           </div>
         ))}
       </div>
 
       {modal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <h3 className="font-bold text-lg mb-4">{editId ? "Garson Düzenle" : "Garson Ekle"}</h3>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="rounded-2xl p-6 w-full max-w-sm" style={{ background: "#111111", border: "1px solid rgba(204,21,21,0.35)" }}>
+            <h3 className="font-bold text-lg text-white mb-4">{editId ? "Garson Düzenle" : "Garson Ekle"}</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                <label className="block text-xs font-semibold uppercase mb-1" style={labelStyle}>Ad Soyad</label>
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
-                <input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                <label className="block text-xs font-semibold uppercase mb-1" style={labelStyle}>Kullanıcı Adı</label>
+                <input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-semibold uppercase mb-1" style={labelStyle}>
                   {editId ? "Yeni Şifre (boş bırakılırsa değişmez)" : "Şifre"}
                 </label>
-                <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" />
+                <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputCls} style={inputStyle} />
               </div>
             </div>
             <div className="flex gap-2 mt-5">
-              <button onClick={() => setModal(false)} className="flex-1 border rounded-xl py-2 text-sm">İptal</button>
-              <button onClick={save} className="flex-1 bg-amber-700 text-white rounded-xl py-2 text-sm font-medium">Kaydet</button>
+              <button onClick={() => setModal(false)}
+                className="flex-1 py-2 rounded-xl text-sm text-gray-300"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                İptal
+              </button>
+              <button onClick={save}
+                className="flex-1 py-2 rounded-xl text-sm font-medium text-white"
+                style={{ background: "#cc1515" }}>
+                Kaydet
+              </button>
             </div>
           </div>
         </div>
