@@ -188,28 +188,52 @@ export default function MenuPage() {
         </div>
       )}
 
-      {/* Sticky kategori tabları */}
-      <div className="sticky top-0 z-10 py-2" style={{ background: "#0d0d0d", borderBottom: "1px solid rgba(204,21,21,0.2)" }}>
+      {/* Sticky kategori kartları */}
+      <div className="sticky top-0 z-10 py-3" style={{ background: "#0d0d0d", borderBottom: "1px solid rgba(204,21,21,0.2)" }}>
         {!searchQuery.trim() && (
-          <div className="max-w-xl mx-auto flex overflow-x-auto gap-1.5 px-4">
-            {categories.map((cat) => (
-              <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                className="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all"
-                style={activeCategory === cat.id
-                  ? { background: "#cc1515", color: "#ffffff" }
-                  : { background: "rgba(204,21,21,0.12)", color: "#cc1515", border: "1px solid rgba(204,21,21,0.3)" }
-                }>
-                {cat.name}
-              </button>
-            ))}
+          <div className="max-w-xl mx-auto flex overflow-x-auto gap-2 px-4 pb-0.5" style={{ scrollbarWidth: "none" }}>
+            {categories.map((cat, index) => {
+              const suits = ["♠", "♣", "♥", "♦"];
+              const suit = suits[index % 4];
+              const redSuit = index % 4 >= 2;
+              const isActive = activeCategory === cat.id;
+              return (
+                <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
+                  className="flex-shrink-0 rounded-xl transition-all text-left relative overflow-hidden"
+                  style={{
+                    background: isActive ? "#cc1515" : "#1a1a1a",
+                    border: isActive ? "1.5px solid #ff3333" : "1px solid rgba(204,21,21,0.3)",
+                    width: "72px", minHeight: "80px", padding: "8px",
+                    boxShadow: isActive ? "0 0 12px rgba(204,21,21,0.4)" : "none",
+                  }}>
+                  <span className="absolute top-1.5 right-2 text-xs font-bold leading-none"
+                    style={{ color: isActive ? "rgba(255,255,255,0.6)" : redSuit ? "#cc1515" : "rgba(255,255,255,0.35)" }}>
+                    {suit}
+                  </span>
+                  <span className="absolute bottom-1.5 left-2 text-xs font-bold leading-none rotate-180 block"
+                    style={{ color: isActive ? "rgba(255,255,255,0.6)" : redSuit ? "#cc1515" : "rgba(255,255,255,0.35)" }}>
+                    {suit}
+                  </span>
+                  <div className="flex flex-col items-center justify-center h-full gap-1 pt-1">
+                    <span className="text-xl leading-none"
+                      style={{ color: isActive ? "#ffffff" : redSuit ? "#cc1515" : "#e5e7eb" }}>
+                      {suit}
+                    </span>
+                    <span className="text-center font-semibold leading-tight" style={{ fontSize: "10px", color: isActive ? "#ffffff" : "#d1d5db", wordBreak: "break-word" }}>
+                      {cat.name}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Ürünler */}
-      <main className="max-w-xl mx-auto px-4 py-4 space-y-3">
+      {/* Ürünler — 2 sütun grid */}
+      <main className="max-w-xl mx-auto px-4 py-4">
         {searchQuery.trim().length > 1 && (
-          <p className="text-xs" style={{ color: "rgba(204,21,21,0.6)" }}>
+          <p className="text-xs mb-3" style={{ color: "rgba(204,21,21,0.6)" }}>
             &quot;{searchQuery}&quot; için {searchResults.length} sonuç
           </p>
         )}
@@ -218,30 +242,33 @@ export default function MenuPage() {
             {searchQuery.trim().length > 1 ? "Ürün bulunamadı." : "Bu kategoride ürün bulunmuyor."}
           </p>
         )}
-        {displayProducts.map((product) => (
-          <div key={product.id} className="rounded-xl overflow-hidden flex fade-in"
-            style={{ background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.25)" }}>
-            {product.imageUrl && (
-              <img src={product.imageUrl} alt={product.name} className="w-24 h-24 object-cover flex-shrink-0" />
-            )}
-            <div className="p-3 flex flex-col justify-center flex-1">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-white text-sm leading-snug">{product.name}</h3>
-                <span className="font-bold whitespace-nowrap text-sm" style={{ color: "#cc1515" }}>
+        <div className="grid grid-cols-2 gap-3">
+          {displayProducts.map((product) => (
+            <div key={product.id} className="rounded-xl overflow-hidden flex flex-col fade-in"
+              style={{ background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.25)" }}>
+              {product.imageUrl
+                ? <img src={product.imageUrl} alt={product.name} className="w-full h-28 object-cover" />
+                : <div className="w-full h-14 flex items-center justify-center" style={{ background: "rgba(204,21,21,0.06)" }}>
+                    <span style={{ color: "rgba(204,21,21,0.25)", fontSize: "1.25rem" }}>♠</span>
+                  </div>
+              }
+              <div className="p-2.5 flex flex-col flex-1">
+                <h3 className="font-semibold text-white text-xs leading-snug line-clamp-2">{product.name}</h3>
+                {product.description && (
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{product.description}</p>
+                )}
+                {"categoryName" in product && searchQuery.trim().length > 1 && (
+                  <p className="text-xs mt-1 font-medium" style={{ color: "rgba(204,21,21,0.5)" }}>
+                    {(product as typeof product & { categoryName: string }).categoryName}
+                  </p>
+                )}
+                <span className="font-bold text-sm mt-1.5" style={{ color: "#cc1515" }}>
                   {product.price.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
                 </span>
               </div>
-              {product.description && (
-                <p className="text-xs text-gray-400 mt-1 line-clamp-2">{product.description}</p>
-              )}
-              {"categoryName" in product && searchQuery.trim().length > 1 && (
-                <p className="text-xs mt-1 font-medium" style={{ color: "rgba(204,21,21,0.5)" }}>
-                  {(product as typeof product & { categoryName: string }).categoryName}
-                </p>
-              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
         <p className="text-center py-6" style={{ color: "rgba(204,21,21,0.3)", fontSize: "1.5rem", letterSpacing: "0.5em" }}>♠ ♥ ♦ ♣</p>
       </main>
     </div>
