@@ -28,6 +28,10 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState<"logo" | "cover" | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
 
@@ -58,6 +62,22 @@ export default function SettingsPage() {
       setUploadError("Sunucuya bağlanılamadı");
     }
     setUploading(null);
+  }
+
+  async function savePassword() {
+    if (newPassword.length < 4) { setPwMsg({ ok: false, text: "En az 4 karakter olmalı" }); return; }
+    if (newPassword !== confirmPassword) { setPwMsg({ ok: false, text: "Şifreler eşleşmiyor" }); return; }
+    setPwSaving(true);
+    const res = await fetch("/api/admin/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ newPassword }),
+    });
+    const data = await res.json();
+    setPwMsg(res.ok ? { ok: true, text: "Şifre güncellendi" } : { ok: false, text: data.error ?? "Hata" });
+    if (res.ok) { setNewPassword(""); setConfirmPassword(""); }
+    setPwSaving(false);
+    setTimeout(() => setPwMsg(null), 3000);
   }
 
   async function save() {
@@ -228,6 +248,40 @@ export default function SettingsPage() {
           className="w-full py-3 rounded-xl font-bold disabled:opacity-50"
           style={{ background: "#cc1515", color: "#ffffff" }}>
           {saving ? "Kaydediliyor..." : "Kaydet"}
+        </button>
+      </div>
+
+      {/* Şifre Değiştir */}
+      <div className="rounded-2xl p-6 mt-5 space-y-4" style={{ background: "var(--a-card)", border: "1px solid var(--a-inp-border)" }}>
+        <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>Admin Şifresi</p>
+
+        {pwMsg && (
+          <div className="rounded-xl px-4 py-2.5 text-sm"
+            style={pwMsg.ok
+              ? { background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)" }
+              : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+            {pwMsg.ok ? "✓ " : "✕ "}{pwMsg.text}
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={labelStyle}>Yeni Şifre</label>
+          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="En az 4 karakter"
+            className="w-full rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none"
+            style={inputStyle} />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={labelStyle}>Şifreyi Tekrarla</label>
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Aynı şifreyi tekrar girin"
+            className="w-full rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none"
+            style={inputStyle} />
+        </div>
+        <button onClick={savePassword} disabled={pwSaving || !newPassword || !confirmPassword}
+          className="w-full py-2.5 rounded-xl font-bold text-white disabled:opacity-40"
+          style={{ background: "#cc1515" }}>
+          {pwSaving ? "Kaydediliyor..." : "Şifreyi Güncelle"}
         </button>
       </div>
     </div>
