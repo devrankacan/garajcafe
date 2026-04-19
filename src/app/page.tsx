@@ -6,6 +6,51 @@ type Product = { id: number; name: string; description?: string; price: number; 
 type Category = { id: number; name: string; products: Product[] & { categoryName?: string } };
 type Settings = { businessName?: string; about?: string; wifi?: string; instagram?: string; mapUrl?: string; logoUrl?: string; coverUrl?: string };
 
+const BG_CARDS = [
+  { rank: "A",  suit: "♠", left: "-14%", top: "10%",  rotate: "-20deg", size: 88 },
+  { rank: "A",  suit: "♦", left: "76%",  top: "6%",   rotate: "16deg",  size: 80 },
+  { rank: "K",  suit: "♥", left: "-10%", top: "40%",  rotate: "24deg",  size: 82 },
+  { rank: "J",  suit: "♣", left: "78%",  top: "36%",  rotate: "-18deg", size: 76 },
+  { rank: "Q",  suit: "♦", left: "-12%", top: "68%",  rotate: "-14deg", size: 80 },
+  { rank: "10", suit: "♠", left: "75%",  top: "63%",  rotate: "22deg",  size: 74 },
+];
+
+function BgCard({ rank, suit, left, top, rotate, size }: typeof BG_CARDS[0]) {
+  const isRed = suit === "♦" || suit === "♥";
+  const clr = isRed ? "#cc1515" : "#111111";
+  const h = Math.round(size * 1.42);
+  return (
+    <div style={{
+      position: "fixed", left, top,
+      width: size, height: h,
+      transform: `rotate(${rotate})`,
+      opacity: 0.10,
+      pointerEvents: "none",
+      zIndex: 0,
+      background: "#f5f0e8",
+      borderRadius: size * 0.1,
+      boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+      display: "flex",
+      flexDirection: "column",
+      padding: size * 0.08,
+      userSelect: "none",
+      fontFamily: "Georgia, serif",
+    }}>
+      <div style={{ color: clr, fontSize: size * 0.18, fontWeight: "bold", lineHeight: 1.1 }}>
+        <div>{rank}</div>
+        <div style={{ fontSize: size * 0.17 }}>{suit}</div>
+      </div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.38, color: clr }}>
+        {suit}
+      </div>
+      <div style={{ color: clr, fontSize: size * 0.18, fontWeight: "bold", lineHeight: 1.1, transform: "rotate(180deg)", alignSelf: "flex-end" }}>
+        <div>{rank}</div>
+        <div style={{ fontSize: size * 0.17 }}>{suit}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function MenuPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<Settings>({});
@@ -58,6 +103,14 @@ export default function MenuPage() {
 
   return (
     <div className="felt-bg min-h-screen">
+
+      {/* Arka plan kart dekorasyonu */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
+        {BG_CARDS.map((c, i) => <BgCard key={i} {...c} />)}
+      </div>
+
+      {/* İçerik katmanı */}
+      <div style={{ position: "relative", zIndex: 1 }}>
 
       {/* Sol Çekmece (Drawer) */}
       {drawerOpen && (
@@ -286,6 +339,7 @@ export default function MenuPage() {
         </div>
         <p className="text-center py-6" style={{ color: "rgba(204,21,21,0.3)", fontSize: "1.5rem", letterSpacing: "0.5em" }}>♠ ♥ ♦ ♣</p>
       </main>
+      </div>{/* /içerik katmanı */}
     </div>
   );
 }
