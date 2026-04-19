@@ -9,6 +9,7 @@ const tabs = [
   { label: "♦ Garsonlar", href: "/admin/waiters" },
   { label: "♣ Menü", href: "/admin/menu" },
   { label: "⚙ Ayarlar", href: "/admin/settings" },
+  { label: "📊 Raporlar", href: "/admin/reports" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -127,7 +127,7 @@ export default function OrdersPage() {
     }
     const approved = await fetch(`/api/orders?tableId=${tableModal.id}&status=APPROVED,PENDING`).then((r) => r.json());
     await Promise.all(approved.map((o: Order) =>
-      fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "CLOSED" }) })
+      fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "CLOSED", paymentMethod: method }) })
     ));
     await fetch(`/api/tables/${tableModal.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "EMPTY" }) });
     setTableModal(null);
@@ -177,7 +177,7 @@ export default function OrdersPage() {
     for (const order of approved) {
       if (remaining <= 0) break;
       if (order.total <= remaining + 0.01) {
-        await fetch(`/api/orders/${order.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "CLOSED" }) });
+        await fetch(`/api/orders/${order.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "CLOSED", paymentMethod: "Kısmi" }) });
         remaining -= order.total;
       }
     }
