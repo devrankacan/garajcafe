@@ -32,12 +32,21 @@ export default function SettingsPage() {
     setUploading(key === "logoUrl" ? "logo" : "cover");
     setUploadError("");
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (data.url) setForm((p) => ({ ...p, [key]: data.url }));
-      else setUploadError(data.error ?? "Yükleme başarısız");
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: base64, name: file.name }),
+      });
+      let data: { url?: string; error?: string };
+      try { data = await res.json(); } catch { data = {}; }
+      if (data.url) setForm((p) => ({ ...p, [key]: data.url as string }));
+      else setUploadError(data.error ?? `HTTP ${res.status}: Yükleme başarısız`);
     } catch {
       setUploadError("Sunucuya bağlanılamadı");
     }
