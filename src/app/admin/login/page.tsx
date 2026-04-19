@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +17,8 @@ export default function AdminLoginPage() {
       body: JSON.stringify({ password }),
     });
     if (res.ok) {
-      router.replace("/admin");
+      window.location.href = "/admin";
+      return;
     } else {
       const data = await res.json();
       setError(data.error ?? "Hata oluştu");
