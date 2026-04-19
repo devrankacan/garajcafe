@@ -264,25 +264,22 @@ export default function MenuPage() {
           {displayProducts.map((product) => (
             <div key={product.id} className="rounded-xl overflow-hidden flex flex-col fade-in"
               style={{ background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.25)" }}>
-              {product.imageUrl
-                ? <img src={product.imageUrl} alt={product.name} className="w-full h-28 object-cover" />
-                : <div className="w-full h-14 flex items-center justify-center" style={{ background: "rgba(204,21,21,0.06)" }}>
-                    <span style={{ color: "rgba(204,21,21,0.25)", fontSize: "1.25rem" }}>♠</span>
-                  </div>
-              }
-              <div className="p-2.5 flex flex-col flex-1">
-                <h3 className="font-semibold text-white text-xs leading-snug line-clamp-2">{product.name}</h3>
+              {product.imageUrl && (
+                <img src={product.imageUrl} alt={product.name} className="w-full h-28 object-cover" />
+              )}
+              <div className="p-3 flex flex-col flex-1 text-center">
+                <h3 className="font-bold text-white text-sm leading-snug">{product.name}</h3>
                 {product.description && (
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 flex-1">{product.description}</p>
+                  <p className="text-xs text-gray-400 mt-1.5 leading-snug line-clamp-3 italic flex-1">{product.description}</p>
                 )}
                 {"categoryName" in product && searchQuery.trim().length > 1 && (
                   <p className="text-xs mt-1 font-medium" style={{ color: "rgba(204,21,21,0.5)" }}>
                     {(product as typeof product & { categoryName: string }).categoryName}
                   </p>
                 )}
-                <span className="font-bold text-sm mt-1.5" style={{ color: "#cc1515" }}>
-                  {product.price.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
-                </span>
+                <p className="font-bold text-xl mt-2" style={{ color: "#f59e0b" }}>
+                  {product.price.toLocaleString("tr-TR")} ₺
+                </p>
               </div>
             </div>
           ))}
