@@ -88,10 +88,17 @@ export default function MenuPage() {
                 </div>
               )}
               {settings.wifi && (
-                <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
-                  <span className="text-2xl">📶</span>
+                <div className="px-5 py-4 flex items-center gap-4" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(204,21,21,0.12)", border: "1px solid rgba(204,21,21,0.2)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                      <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                      <circle cx="12" cy="20" r="1" fill="#cc1515"/>
+                    </svg>
+                  </div>
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#cc1515" }}>Wi-Fi Şifresi</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#cc1515" }}>Wi-Fi Şifresi</p>
                     <p className="text-sm font-mono font-bold text-white mt-0.5">{settings.wifi}</p>
                   </div>
                 </div>
@@ -99,21 +106,32 @@ export default function MenuPage() {
               {settings.instagram && (
                 <a href={`https://instagram.com/${settings.instagram.replace("@", "")}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="px-5 py-4 flex items-center gap-3 hover:bg-white/5 transition-colors"
+                  className="px-5 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors"
                   style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
-                  <span className="text-2xl">📸</span>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(204,21,21,0.12)", border: "1px solid rgba(204,21,21,0.2)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                      <circle cx="12" cy="12" r="4"/>
+                      <circle cx="17.5" cy="6.5" r="1" fill="#cc1515" stroke="none"/>
+                    </svg>
+                  </div>
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#cc1515" }}>Instagram</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#cc1515" }}>Instagram</p>
                     <p className="text-sm text-gray-300 mt-0.5">{settings.instagram}</p>
                   </div>
                 </a>
               )}
               {settings.mapUrl && (
                 <a href={settings.mapUrl} target="_blank" rel="noopener noreferrer"
-                  className="px-5 py-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
-                  <span className="text-2xl">📍</span>
+                  className="px-5 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(204,21,21,0.12)", border: "1px solid rgba(204,21,21,0.2)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                      <circle cx="12" cy="9" r="2.5"/>
+                    </svg>
+                  </div>
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#cc1515" }}>Konum</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#cc1515" }}>Konum</p>
                     <p className="text-sm text-gray-300 mt-0.5">Haritada Gör</p>
                   </div>
                 </a>
