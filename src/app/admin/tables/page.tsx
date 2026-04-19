@@ -12,9 +12,9 @@ const statusStyle: Record<string, { bg: string; color: string }> = {
   OPEN:     { bg: "rgba(234,179,8,0.1)",  color: "#facc15" },
 };
 
-const card = { background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.2)" };
+const card = { background: "var(--a-card)", border: "1px solid var(--a-border)" };
 const inputCls = "rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none";
-const inputStyle = { background: "rgba(0,0,0,0.4)", border: "1px solid rgba(204,21,21,0.3)" };
+const inputStyle = { background: "var(--a-inp)", border: "1px solid var(--a-inp-border)" };
 
 export default function TablesPage() {
   const [tables, setTables] = useState<Table[]>([]);

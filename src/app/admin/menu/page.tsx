@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 type Product = { id: number; name: string; description?: string; price: number; imageUrl?: string; isAvailable: boolean; sortOrder: number; categoryId: number };
 type Category = { id: number; name: string; sortOrder: number; products: Product[] };
 
-const card = { background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.2)" };
+const card = { background: "var(--a-card)", border: "1px solid var(--a-border)" };
 const inputCls = "w-full rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none";
-const inputStyle = { background: "rgba(0,0,0,0.4)", border: "1px solid rgba(204,21,21,0.25)" };
+const inputStyle = { background: "var(--a-inp)", border: "1px solid var(--a-inp-border)" };
 const labelStyle = { color: "#cc1515" };
 
 export default function MenuAdminPage() {
@@ -92,7 +92,7 @@ export default function MenuAdminPage() {
               className="rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition-all"
               style={activeCategory === cat.id
                 ? { background: "#cc1515", color: "#ffffff" }
-                : { background: "#1a1a1a", color: "#d1d5db", border: "1px solid rgba(204,21,21,0.15)" }}>
+                : { background: "var(--a-card)", color: "var(--a-text2)", border: "1px solid var(--a-border2)" }}>
               <span onClick={() => setActiveCategory(cat.id)} className="flex-1 text-sm font-medium truncate">{cat.name}</span>
               <div className="flex gap-1 ml-1 flex-shrink-0">
                 <button onClick={() => { setCatForm({ name: cat.name, sortOrder: cat.sortOrder }); setEditCatId(cat.id); setCatModal(true); }} className="opacity-60 hover:opacity-100 text-xs">✏️</button>
@@ -149,7 +149,7 @@ export default function MenuAdminPage() {
       {/* Kategori Modal */}
       {catModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="rounded-2xl p-6 w-full max-w-sm" style={{ background: "#111111", border: "1px solid rgba(204,21,21,0.35)" }}>
+          <div className="rounded-2xl p-6 w-full max-w-sm" style={{ background: "var(--a-card2)", border: "1px solid var(--a-acc-border)" }}>
             <h3 className="font-bold text-lg text-white mb-4">{editCatId ? "Kategori Düzenle" : "Kategori Ekle"}</h3>
             <div className="space-y-3">
               <div>
@@ -164,7 +164,7 @@ export default function MenuAdminPage() {
             <div className="flex gap-2 mt-5">
               <button onClick={() => setCatModal(false)}
                 className="flex-1 py-2 rounded-xl text-sm text-gray-300"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                style={{ background: "var(--a-btn2)", border: "1px solid var(--a-border2)" }}>
                 İptal
               </button>
               <button onClick={saveCategory}
@@ -180,7 +180,7 @@ export default function MenuAdminPage() {
       {/* Ürün Modal */}
       {prodModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto" style={{ background: "#111111", border: "1px solid rgba(204,21,21,0.35)" }}>
+          <div className="rounded-2xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto" style={{ background: "var(--a-card2)", border: "1px solid var(--a-acc-border)" }}>
             <h3 className="font-bold text-lg text-white mb-4">{editProdId ? "Ürün Düzenle" : "Ürün Ekle"}</h3>
             <div className="space-y-3">
               {[
@@ -203,7 +203,7 @@ export default function MenuAdminPage() {
             <div className="flex gap-2 mt-5">
               <button onClick={() => { setProdModal(false); resetProd(); }}
                 className="flex-1 py-2 rounded-xl text-sm text-gray-300"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                style={{ background: "var(--a-btn2)", border: "1px solid var(--a-border2)" }}>
                 İptal
               </button>
               <button onClick={saveProduct}

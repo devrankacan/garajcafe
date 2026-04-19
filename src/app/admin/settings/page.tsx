@@ -65,7 +65,7 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2500);
   }
 
-  const inputStyle = { background: "rgba(0,0,0,0.3)", border: "1px solid rgba(204,21,21,0.25)", color: "white" };
+  const inputStyle = { background: "var(--a-inp)", border: "1px solid var(--a-inp-border)", color: "var(--a-text)" };
   const labelStyle = { color: "#cc1515" };
 
   const fields: { label: string; key: keyof Form; hint?: string; placeholder: string }[] = [
@@ -92,7 +92,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="rounded-2xl p-6 space-y-5" style={{ background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.25)" }}>
+      <div className="rounded-2xl p-6 space-y-5" style={{ background: "var(--a-card)", border: "1px solid var(--a-inp-border)" }}>
 
         {/* Kapak Görseli */}
         <div>
@@ -100,7 +100,7 @@ export default function SettingsPage() {
           <input ref={coverRef} type="file" accept="image/*" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "coverUrl"); }} />
           <div className="relative w-full h-36 rounded-xl overflow-hidden cursor-pointer"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(204,21,21,0.25)" }}
+            style={{ background: "var(--a-inp)", border: "1px solid var(--a-inp-border)" }}
             onClick={() => coverRef.current?.click()}>
             {form.coverUrl
               ? <img src={form.coverUrl} alt="Kapak" className="w-full h-full object-cover" />
@@ -128,7 +128,7 @@ export default function SettingsPage() {
           <label className="block text-xs font-semibold uppercase mb-2" style={labelStyle}>Firma Logosu</label>
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-              style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(204,21,21,0.25)" }}>
+              style={{ background: "var(--a-inp)", border: "1px solid var(--a-inp-border)" }}>
               {form.logoUrl
                 ? <img src={form.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
                 : <span className="text-3xl opacity-30">♠</span>}

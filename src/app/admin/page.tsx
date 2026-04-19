@@ -20,7 +20,7 @@ const tableStatusStyle: Record<string, { bg: string; color: string; label: strin
   OPEN:     { bg: "rgba(234,179,8,0.08)",  color: "#facc15", label: "Açık" },
 };
 
-const card = { background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.2)" };
+const card = { background: "var(--a-card)", border: "1px solid var(--a-border)" };
 
 export default function OrdersPage() {
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
@@ -208,7 +208,7 @@ export default function OrdersPage() {
           )}
           {pendingOrders.map((order) => (
             <div key={order.id} className="rounded-xl overflow-hidden" style={card}>
-              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }}>
+              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--a-border2)" }}>
                 <div>
                   <span className="font-bold text-white">{order.table.name}</span>
                   {order.waiter && <span className="ml-2 text-xs text-gray-400">— {order.waiter.name}</span>}
@@ -223,12 +223,12 @@ export default function OrdersPage() {
                   </div>
                 ))}
                 {order.note && <p className="text-xs mt-2 rounded px-2 py-1" style={{ background: "rgba(204,21,21,0.1)", color: "#fca5a5" }}>Not: {order.note}</p>}
-                <div className="flex justify-between font-bold mt-2 pt-2 text-white" style={{ borderTop: "1px solid rgba(204,21,21,0.15)" }}>
+                <div className="flex justify-between font-bold mt-2 pt-2 text-white" style={{ borderTop: "1px solid var(--a-border2)" }}>
                   <span>Toplam</span>
                   <span style={{ color: "#cc1515" }}>{order.total.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
                 </div>
               </div>
-              <div className="flex gap-2 px-4 py-3" style={{ background: "rgba(0,0,0,0.2)", borderTop: "1px solid rgba(204,21,21,0.15)" }}>
+              <div className="flex gap-2 px-4 py-3" style={{ background: "var(--a-overlay)", borderTop: "1px solid var(--a-border2)" }}>
                 <button onClick={() => updateStatus(order.id, "APPROVED")} className="flex-1 bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-medium">Onayla</button>
                 <button onClick={() => updateStatus(order.id, "REJECTED")} className="flex-1 bg-red-700 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium">Reddet</button>
               </div>
@@ -260,11 +260,11 @@ export default function OrdersPage() {
       {tableModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-3">
           <div className="rounded-2xl w-full flex flex-col overflow-hidden"
-            style={{ background: "#1c1c1c", border: "1px solid rgba(204,21,21,0.35)", maxWidth: "900px", height: "min(85vh, 640px)" }}>
+            style={{ background: "var(--a-pos)", border: "1px solid var(--a-acc-border)", maxWidth: "900px", height: "min(85vh, 640px)" }}>
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
-              style={{ background: "#111", borderBottom: "1px solid rgba(204,21,21,0.25)" }}>
+              style={{ background: "var(--a-card2)", borderBottom: "1px solid var(--a-border2)" }}>
               <h3 className="font-bold text-lg" style={{ color: "#cc1515" }}>{tableModal.name} Adisyonu</h3>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-white text-lg">{grandTotal.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
@@ -283,10 +283,10 @@ export default function OrdersPage() {
 
               {/* Sol: Sipariş listesi + ödeme */}
               <div className="flex flex-col flex-shrink-0 overflow-hidden"
-                style={{ width: "280px", borderRight: "1px solid rgba(204,21,21,0.2)" }}>
+                style={{ width: "280px", borderRight: "1px solid var(--a-border)" }}>
 
                 {/* Sipariş başlığı */}
-                <div className="px-4 py-2.5 flex-shrink-0" style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }}>
+                <div className="px-4 py-2.5 flex-shrink-0" style={{ borderBottom: "1px solid var(--a-border2)" }}>
                   <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>≡ Sipariş Listesi</p>
                 </div>
 
@@ -334,7 +334,7 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Toplam + butonlar */}
-                <div className="flex-shrink-0 px-3 py-3 space-y-2" style={{ borderTop: "1px solid rgba(204,21,21,0.2)" }}>
+                <div className="flex-shrink-0 px-3 py-3 space-y-2" style={{ borderTop: "1px solid var(--a-border)" }}>
                   <div className="flex items-center justify-between px-1">
                     <span className="text-xs font-semibold text-gray-400 uppercase">Toplam</span>
                     <span className="font-bold text-white">{grandTotal.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
@@ -375,7 +375,7 @@ export default function OrdersPage() {
 
                   <button onClick={() => { setTableModal(null); setCart([]); }}
                     className="w-full py-1.5 rounded-lg text-xs text-gray-400"
-                    style={{ background: "#2a2a2a", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    style={{ background: "var(--a-card2)", border: "1px solid var(--a-border2)" }}>
                     ✕ Pencereyi Kapat
                   </button>
                 </div>
@@ -385,13 +385,13 @@ export default function OrdersPage() {
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Kategori tabları */}
                 <div className="flex gap-1.5 overflow-x-auto px-4 py-3 flex-shrink-0"
-                  style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }}>
+                  style={{ borderBottom: "1px solid var(--a-border2)" }}>
                   {categories.map((cat) => (
                     <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
                       className="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold flex-shrink-0 transition-all"
                       style={activeCategory === cat.id
                         ? { background: "#cc1515", color: "#fff" }
-                        : { background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid rgba(255,255,255,0.1)" }}>
+                        : { background: "var(--a-btn2b)", color: "var(--a-text2)", border: "1px solid var(--a-border2)" }}>
                       {cat.name}
                     </button>
                   ))}
@@ -403,7 +403,7 @@ export default function OrdersPage() {
                     {activeProducts.map((product) => (
                       <button key={product.id} onClick={() => addToCart(product)}
                         className="rounded-xl p-3 text-center transition-all hover:brightness-125 active:scale-95"
-                        style={{ background: "#252525", border: "1px solid rgba(255,255,255,0.08)" }}>
+                        style={{ background: "var(--a-prod)", border: "1px solid var(--a-border2)" }}>
                         <p className="font-semibold text-white text-sm leading-snug">{product.name}</p>
                         <p className="font-bold mt-1 text-sm" style={{ color: "#f59e0b" }}>
                           {product.price.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
@@ -424,8 +424,8 @@ export default function OrdersPage() {
       {/* ── Masayı Aktar Modal ── */}
       {transferModal && tableModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
-          <div className="rounded-2xl w-full max-w-xs" style={{ background: "#111", border: "1px solid rgba(29,78,216,0.5)" }}>
-            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="rounded-2xl w-full max-w-xs" style={{ background: "var(--a-card2)", border: "1px solid rgba(29,78,216,0.5)" }}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--a-border2)" }}>
               <h3 className="font-bold text-white">Masayı Aktar</h3>
               <button onClick={() => setTransferModal(false)} className="text-gray-400 hover:text-white">✕</button>
             </div>
@@ -439,7 +439,7 @@ export default function OrdersPage() {
                   return (
                     <button key={t.id} onClick={() => transferTable(t)} disabled={saving}
                       className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:brightness-125 disabled:opacity-40"
-                      style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      style={{ background: "var(--a-card)", border: "1px solid var(--a-border2)" }}>
                       <span className="font-semibold text-white text-sm">{t.name}</span>
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.4)", color: st.color }}>{st.label}</span>
                     </button>
@@ -450,7 +450,7 @@ export default function OrdersPage() {
             <div className="px-4 pb-4">
               <button onClick={() => setTransferModal(false)}
                 className="w-full py-2 rounded-xl text-sm text-gray-400 mt-1"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                style={{ background: "var(--a-btn2)", border: "1px solid var(--a-border2)" }}>
                 İptal
               </button>
             </div>
@@ -461,8 +461,8 @@ export default function OrdersPage() {
       {/* ── Kısmi Tahsilat Modal ── */}
       {partialModal && tableModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
-          <div className="rounded-2xl w-full max-w-xs" style={{ background: "#111", border: "1px solid rgba(194,65,12,0.5)" }}>
-            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="rounded-2xl w-full max-w-xs" style={{ background: "var(--a-card2)", border: "1px solid rgba(194,65,12,0.5)" }}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--a-border2)" }}>
               <h3 className="font-bold text-white">Kısmi Tahsilat</h3>
               <button onClick={() => setPartialModal(false)} className="text-gray-400 hover:text-white">✕</button>
             </div>
@@ -479,7 +479,7 @@ export default function OrdersPage() {
                   onChange={(e) => setPartialAmount(e.target.value)}
                   placeholder="0,00"
                   className="w-full rounded-xl px-4 py-3 text-white text-lg font-bold text-center focus:outline-none"
-                  style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(194,65,12,0.4)" }}
+                  style={{ background: "var(--a-inp)", border: "1px solid rgba(194,65,12,0.4)" }}
                   autoFocus
                 />
               </div>
@@ -494,7 +494,7 @@ export default function OrdersPage() {
               <div className="flex gap-2">
                 <button onClick={() => setPartialModal(false)}
                   className="flex-1 py-2.5 rounded-xl text-sm text-gray-300"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  style={{ background: "var(--a-btn2)", border: "1px solid var(--a-border2)" }}>
                   İptal
                 </button>
                 <button onClick={collectPartial} disabled={saving || !partialAmount}

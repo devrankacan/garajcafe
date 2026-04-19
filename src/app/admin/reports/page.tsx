@@ -48,7 +48,7 @@ function fmtOnlyTime(iso: string) {
   });
 }
 
-const card = { background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.2)" };
+const card = { background: "var(--a-card)", border: "1px solid var(--a-border)" };
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<Period>("daily");
@@ -78,7 +78,7 @@ export default function ReportsPage() {
               className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
               style={period === p
                 ? { background: "#cc1515", color: "#fff" }
-                : { background: "rgba(204,21,21,0.1)", color: "#cc1515", border: "1px solid rgba(204,21,21,0.3)" }}>
+                : { background: "var(--a-btn2b)", color: "#cc1515", border: "1px solid rgba(204,21,21,0.3)" }}>
               {periodLabels[p]}
             </button>
           ))}
@@ -143,7 +143,7 @@ export default function ReportsPage() {
 
           {/* Sipariş detay tablosu */}
           <div className="rounded-2xl overflow-hidden" style={card}>
-            <div className="px-5 py-3" style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }}>
+            <div className="px-5 py-3" style={{ borderBottom: "1px solid var(--a-border2)" }}>
               <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>Sipariş Detayları</p>
             </div>
             {data.orders.length === 0 ? (
@@ -187,7 +187,7 @@ export default function ReportsPage() {
               </div>
             )}
             {data.orders.length > 0 && (
-              <div className="px-5 py-3 flex justify-between font-bold" style={{ borderTop: "1px solid rgba(204,21,21,0.2)", background: "rgba(0,0,0,0.2)" }}>
+              <div className="px-5 py-3 flex justify-between font-bold" style={{ borderTop: "1px solid var(--a-border)", background: "var(--a-overlay)" }}>
                 <span className="text-gray-300">TOPLAM</span>
                 <span style={{ color: "#cc1515" }}>{fmtTL(data.totalRevenue)}</span>
               </div>
