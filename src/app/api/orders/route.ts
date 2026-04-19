@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { tableId, items, note } = await req.json();
+  const { tableId, items, note, autoApprove } = await req.json();
 
   const cookieStore = await cookies();
   const waiterId = cookieStore.get("waiter_id")?.value;
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
       tableId,
       note,
       total,
+      status: autoApprove ? "APPROVED" : "PENDING",
       waiterId: waiterId ? Number(waiterId) : null,
       items: {
         create: items.map((item: { productId: number; quantity: number; unitPrice: number }) => ({

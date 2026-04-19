@@ -40,11 +40,14 @@ export default function WaiterPage() {
 
   useEffect(() => {
     if (!authChecked) return;
-    fetch("/api/tables").then((r) => r.json()).then(setTables);
+    const fetchTables = () => fetch("/api/tables").then((r) => r.json()).then(setTables);
+    fetchTables();
     fetch("/api/categories").then((r) => r.json()).then((cats) => {
       setCategories(cats);
       if (cats.length > 0) setActiveCategory(cats[0].id);
     });
+    const interval = setInterval(fetchTables, 5000);
+    return () => clearInterval(interval);
   }, [authChecked]);
 
   async function logout() {
