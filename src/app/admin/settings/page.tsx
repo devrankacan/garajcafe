@@ -5,8 +5,14 @@ import { useEffect, useRef, useState } from "react";
 type Form = {
   businessName: string;
   about: string;
+  address: string;
+  hours: string;
+  email: string;
+  phone: string;
   wifi: string;
   instagram: string;
+  facebook: string;
+  twitter: string;
   mapUrl: string;
   baseUrl: string;
   logoUrl: string;
@@ -15,7 +21,8 @@ type Form = {
 
 export default function SettingsPage() {
   const [form, setForm] = useState<Form>({
-    businessName: "", about: "", wifi: "", instagram: "", mapUrl: "", baseUrl: "", logoUrl: "", coverUrl: "",
+    businessName: "", about: "", address: "", hours: "", email: "", phone: "",
+    wifi: "", instagram: "", facebook: "", twitter: "", mapUrl: "", baseUrl: "", logoUrl: "", coverUrl: "",
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -154,11 +161,64 @@ export default function SettingsPage() {
 
         <div style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }} />
 
-        {fields.map(({ label, key, hint, placeholder }) => (
+        {/* Genel */}
+        {[
+          { label: "İşletme Adı", key: "businessName", placeholder: "Garaj Cafe" },
+          { label: "Hakkımızda", key: "about", placeholder: "Kısa bir tanıtım..." },
+        ].map(({ label, key, placeholder }) => (
+          <div key={key}>
+            <label className="block text-xs font-semibold uppercase mb-1.5" style={labelStyle}>{label}</label>
+            <input value={form[key as keyof Form]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              placeholder={placeholder} className="w-full rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none"
+              style={inputStyle} />
+          </div>
+        ))}
+
+        <div style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }} />
+        <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>İletişim & Konum</p>
+
+        {[
+          { label: "Adres", key: "address", placeholder: "Mahalle, Cadde No, İlçe/İl" },
+          { label: "Çalışma Saatleri", key: "hours", placeholder: "04:00 – 00:00" },
+          { label: "E-posta", key: "email", placeholder: "info@garajcafe.com" },
+          { label: "Telefon", key: "phone", placeholder: "0(533) 513 51 57" },
+          { label: "Harita Bağlantısı", key: "mapUrl", placeholder: "https://maps.google.com/..." },
+        ].map(({ label, key, placeholder }) => (
+          <div key={key}>
+            <label className="block text-xs font-semibold uppercase mb-1.5" style={labelStyle}>{label}</label>
+            <input value={form[key as keyof Form]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              placeholder={placeholder} className="w-full rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none"
+              style={inputStyle} />
+          </div>
+        ))}
+
+        <div style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }} />
+        <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>Sosyal Medya</p>
+
+        {[
+          { label: "Instagram", key: "instagram", placeholder: "@garajcafe" },
+          { label: "Facebook", key: "facebook", placeholder: "@garajcafe" },
+          { label: "Twitter / X", key: "twitter", placeholder: "@garajcafe" },
+        ].map(({ label, key, placeholder }) => (
+          <div key={key}>
+            <label className="block text-xs font-semibold uppercase mb-1.5" style={labelStyle}>{label}</label>
+            <input value={form[key as keyof Form]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              placeholder={placeholder} className="w-full rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none"
+              style={inputStyle} />
+          </div>
+        ))}
+
+        <div style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }} />
+        <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>Sistem</p>
+
+        {[
+          { label: "Wi-Fi Şifresi", key: "wifi", placeholder: "wifi123" },
+          { label: "Site URL (QR için)", key: "baseUrl", hint: "QR kodların yönleneceği adres", placeholder: "https://garajcafe.shop" },
+        ].map(({ label, key, hint, placeholder }: { label: string; key: string; hint?: string; placeholder: string }) => (
           <div key={key}>
             <label className="block text-xs font-semibold uppercase mb-1.5" style={labelStyle}>{label}</label>
             {hint && <p className="text-xs text-gray-500 mb-1">{hint}</p>}
-            <input value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+            <input value={form[key as keyof Form]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               placeholder={placeholder} className="w-full rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 focus:outline-none"
               style={inputStyle} />
           </div>

@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 type Product = { id: number; name: string; description?: string; price: number; imageUrl?: string };
 type Category = { id: number; name: string; products: Product[] & { categoryName?: string } };
-type Settings = { businessName?: string; about?: string; wifi?: string; instagram?: string; mapUrl?: string; logoUrl?: string; coverUrl?: string };
+type Settings = {
+  businessName?: string; about?: string; logoUrl?: string; coverUrl?: string;
+  address?: string; hours?: string; email?: string; phone?: string; mapUrl?: string;
+  wifi?: string; instagram?: string; facebook?: string; twitter?: string;
+};
 
 const BG_CARDS = [
   { rank: "A",  suit: "♠", left: "-14%", top: "10%",  rotate: "-20deg", size: 88 },
@@ -134,12 +138,68 @@ export default function MenuPage() {
 
             {/* Drawer Items */}
             <div className="flex-1 overflow-y-auto py-2">
+
+              {/* Hakkımızda */}
               {settings.about && (
                 <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
                   <p className="text-xs font-semibold uppercase mb-1.5" style={{ color: "#cc1515" }}>Hakkımızda</p>
                   <p className="text-sm text-gray-300 leading-relaxed">{settings.about}</p>
                 </div>
               )}
+
+              {/* İşletme Bilgileri */}
+              {(settings.address || settings.hours || settings.email || settings.phone || settings.mapUrl) && (
+                <div className="px-5 pt-4 pb-2" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
+                  <p className="text-xs font-semibold uppercase mb-3" style={{ color: "#cc1515" }}>İşletme Bilgileri</p>
+                  <div className="space-y-3">
+                    {settings.address && (
+                      <div className="flex items-start gap-3">
+                        <svg className="flex-shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                          <circle cx="12" cy="9" r="2.5"/>
+                        </svg>
+                        <p className="text-sm text-gray-300 leading-snug">{settings.address}</p>
+                      </div>
+                    )}
+                    {settings.hours && (
+                      <div className="flex items-center gap-3">
+                        <svg className="flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <p className="text-sm text-gray-300">{settings.hours}</p>
+                      </div>
+                    )}
+                    {settings.email && (
+                      <a href={`mailto:${settings.email}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg className="flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                          <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        <p className="text-sm text-gray-300">{settings.email}</p>
+                      </a>
+                    )}
+                    {settings.phone && (
+                      <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg className="flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.56 3.44 2 2 0 0 1 3.53 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.75a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/>
+                        </svg>
+                        <p className="text-sm text-gray-300">{settings.phone}</p>
+                      </a>
+                    )}
+                    {settings.mapUrl && (
+                      <a href={settings.mapUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg className="flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                        </svg>
+                        <p className="text-sm" style={{ color: "#cc1515" }}>Haritada Gör →</p>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Wi-Fi */}
               {settings.wifi && (
                 <div className="px-5 py-4 flex items-center gap-4" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(204,21,21,0.12)", border: "1px solid rgba(204,21,21,0.2)" }}>
@@ -156,39 +216,45 @@ export default function MenuPage() {
                   </div>
                 </div>
               )}
-              {settings.instagram && (
-                <a href={`https://instagram.com/${settings.instagram.replace("@", "")}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="px-5 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors"
-                  style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(204,21,21,0.12)", border: "1px solid rgba(204,21,21,0.2)" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                      <circle cx="12" cy="12" r="4"/>
-                      <circle cx="17.5" cy="6.5" r="1" fill="#cc1515" stroke="none"/>
-                    </svg>
+
+              {/* Sosyal Medya */}
+              {(settings.instagram || settings.facebook || settings.twitter) && (
+                <div className="px-5 pt-4 pb-4" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
+                  <p className="text-xs font-semibold uppercase mb-3" style={{ color: "#cc1515" }}>Sosyal Medya Hesaplarımız</p>
+                  <div className="space-y-3">
+                    {settings.instagram && (
+                      <a href={`https://instagram.com/${settings.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                          <circle cx="12" cy="12" r="4"/>
+                          <circle cx="17.5" cy="6.5" r="1" fill="#cc1515" stroke="none"/>
+                        </svg>
+                        <p className="text-sm text-gray-300">{settings.instagram}</p>
+                      </a>
+                    )}
+                    {settings.facebook && (
+                      <a href={`https://facebook.com/${settings.facebook.replace("@", "")}`} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                        </svg>
+                        <p className="text-sm text-gray-300">{settings.facebook}</p>
+                      </a>
+                    )}
+                    {settings.twitter && (
+                      <a href={`https://twitter.com/${settings.twitter.replace("@", "")}`} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                        </svg>
+                        <p className="text-sm text-gray-300">{settings.twitter}</p>
+                      </a>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#cc1515" }}>Instagram</p>
-                    <p className="text-sm text-gray-300 mt-0.5">{settings.instagram}</p>
-                  </div>
-                </a>
+                </div>
               )}
-              {settings.mapUrl && (
-                <a href={settings.mapUrl} target="_blank" rel="noopener noreferrer"
-                  className="px-5 py-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(204,21,21,0.12)", border: "1px solid rgba(204,21,21,0.2)" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cc1515" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                      <circle cx="12" cy="9" r="2.5"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#cc1515" }}>Konum</p>
-                    <p className="text-sm text-gray-300 mt-0.5">Haritada Gör</p>
-                  </div>
-                </a>
-              )}
+
             </div>
 
             <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(204,21,21,0.2)" }}>
