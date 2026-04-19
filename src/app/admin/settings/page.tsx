@@ -20,6 +20,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState<"logo" | "cover" | null>(null);
+  const [uploadError, setUploadError] = useState("");
   const logoRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
 
@@ -29,11 +30,17 @@ export default function SettingsPage() {
 
   async function uploadFile(file: File, key: "logoUrl" | "coverUrl") {
     setUploading(key === "logoUrl" ? "logo" : "cover");
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (data.url) setForm((p) => ({ ...p, [key]: data.url }));
+    setUploadError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.url) setForm((p) => ({ ...p, [key]: data.url }));
+      else setUploadError(data.error ?? "Yükleme başarısız");
+    } catch {
+      setUploadError("Sunucuya bağlanılamadı");
+    }
     setUploading(null);
   }
 
@@ -63,6 +70,12 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl">
+      {uploadError && (
+        <div className="rounded-xl px-4 py-3 mb-4 text-sm"
+          style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
+          ✕ {uploadError}
+        </div>
+      )}
       {saved && (
         <div className="rounded-xl px-4 py-3 mb-4 font-medium text-sm"
           style={{ background: "rgba(34,197,94,0.15)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.3)" }}>
