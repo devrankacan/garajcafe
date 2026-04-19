@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --felt: #0a2015;
-  --felt-light: #132e1e;
-  --gold: #c9a84c;
-  --gold-light: #e2c06a;
-  --card-bg: #1a3d2b;
+  --felt: #0d0d0d;
+  --felt-light: #1a1a1a;
+  --gold: #cc1515;
+  --gold-light: #e03030;
+  --card-bg: #222222;
 }
 
 body {
@@ -17,12 +17,12 @@ body {
 .felt-bg {
   background-color: var(--felt);
   background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+    radial-gradient(ellipse at 20% 20%, rgba(204,21,21,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(204,21,21,0.04) 0%, transparent 60%);
 }
 
 .gold-border {
-  border: 1px solid rgba(201,168,76,0.4);
+  border: 1px solid rgba(204,21,21,0.4);
 }
 
 .card-suit {

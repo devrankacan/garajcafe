@@ -65,8 +65,8 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2500);
   }
 
-  const inputStyle = { background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,168,76,0.25)", color: "white" };
-  const labelStyle = { color: "#c9a84c" };
+  const inputStyle = { background: "rgba(0,0,0,0.3)", border: "1px solid rgba(204,21,21,0.25)", color: "white" };
+  const labelStyle = { color: "#cc1515" };
 
   const fields: { label: string; key: keyof Form; hint?: string; placeholder: string }[] = [
     { label: "İşletme Adı", key: "businessName", placeholder: "Garaj Cafe" },
@@ -92,7 +92,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="rounded-2xl p-6 space-y-5" style={{ background: "#132e1e", border: "1px solid rgba(201,168,76,0.25)" }}>
+      <div className="rounded-2xl p-6 space-y-5" style={{ background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.25)" }}>
 
         {/* Kapak Görseli */}
         <div>
@@ -100,7 +100,7 @@ export default function SettingsPage() {
           <input ref={coverRef} type="file" accept="image/*" className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "coverUrl"); }} />
           <div className="relative w-full h-36 rounded-xl overflow-hidden cursor-pointer"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,168,76,0.25)" }}
+            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(204,21,21,0.25)" }}
             onClick={() => coverRef.current?.click()}>
             {form.coverUrl
               ? <img src={form.coverUrl} alt="Kapak" className="w-full h-full object-cover" />
@@ -128,7 +128,7 @@ export default function SettingsPage() {
           <label className="block text-xs font-semibold uppercase mb-2" style={labelStyle}>Firma Logosu</label>
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-              style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,168,76,0.25)" }}>
+              style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(204,21,21,0.25)" }}>
               {form.logoUrl
                 ? <img src={form.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
                 : <span className="text-3xl opacity-30">♠</span>}
@@ -138,7 +138,7 @@ export default function SettingsPage() {
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f, "logoUrl"); }} />
               <button onClick={() => logoRef.current?.click()} disabled={uploading === "logo"}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
-                style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.35)" }}>
+                style={{ background: "rgba(204,21,21,0.15)", color: "#cc1515", border: "1px solid rgba(204,21,21,0.35)" }}>
                 {uploading === "logo" ? "Yükleniyor..." : "Bilgisayardan Seç"}
               </button>
               {form.logoUrl && (
@@ -152,7 +152,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }} />
+        <div style={{ borderBottom: "1px solid rgba(204,21,21,0.15)" }} />
 
         {fields.map(({ label, key, hint, placeholder }) => (
           <div key={key}>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
 
         <button onClick={save} disabled={saving}
           className="w-full py-3 rounded-xl font-bold disabled:opacity-50"
-          style={{ background: "#c9a84c", color: "#0a2015" }}>
+          style={{ background: "#cc1515", color: "#ffffff" }}>
           {saving ? "Kaydediliyor..." : "Kaydet"}
         </button>
       </div>

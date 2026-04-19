@@ -51,7 +51,7 @@ export default function MenuPage() {
       <div className="felt-bg min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-4xl mb-3">♠</p>
-          <p className="animate-pulse text-lg font-medium" style={{ color: "#c9a84c" }}>Menü yükleniyor...</p>
+          <p className="animate-pulse text-lg font-medium" style={{ color: "#cc1515" }}>Menü yükleniyor...</p>
         </div>
       </div>
     );
@@ -66,15 +66,15 @@ export default function MenuPage() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setDrawerOpen(false)} />
           {/* Panel */}
           <div className="relative w-72 max-w-[85vw] h-full flex flex-col fade-in"
-            style={{ background: "#0d2318", borderRight: "1px solid rgba(201,168,76,0.3)" }}>
+            style={{ background: "#111111", borderRight: "1px solid rgba(204,21,21,0.3)" }}>
             {/* Drawer Header */}
             <div className="px-5 py-5 flex items-center justify-between"
-              style={{ borderBottom: "1px solid rgba(201,168,76,0.2)" }}>
+              style={{ borderBottom: "1px solid rgba(204,21,21,0.2)" }}>
               <div className="flex items-center gap-3">
                 {settings.logoUrl && (
                   <img src={settings.logoUrl} alt="logo" className="w-10 h-10 rounded-full object-contain bg-white p-0.5" />
                 )}
-                <span className="font-bold" style={{ color: "#c9a84c" }}>{settings.businessName ?? "Menü"}</span>
+                <span className="font-bold" style={{ color: "#cc1515" }}>{settings.businessName ?? "Menü"}</span>
               </div>
               <button onClick={() => setDrawerOpen(false)} className="text-gray-400 hover:text-white text-xl leading-none">✕</button>
             </div>
@@ -82,16 +82,16 @@ export default function MenuPage() {
             {/* Drawer Items */}
             <div className="flex-1 overflow-y-auto py-2">
               {settings.about && (
-                <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
-                  <p className="text-xs font-semibold uppercase mb-1.5" style={{ color: "#c9a84c" }}>Hakkımızda</p>
+                <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
+                  <p className="text-xs font-semibold uppercase mb-1.5" style={{ color: "#cc1515" }}>Hakkımızda</p>
                   <p className="text-sm text-gray-300 leading-relaxed">{settings.about}</p>
                 </div>
               )}
               {settings.wifi && (
-                <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
+                <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
                   <span className="text-2xl">📶</span>
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#c9a84c" }}>Wi-Fi Şifresi</p>
+                    <p className="text-xs font-semibold" style={{ color: "#cc1515" }}>Wi-Fi Şifresi</p>
                     <p className="text-sm font-mono font-bold text-white mt-0.5">{settings.wifi}</p>
                   </div>
                 </div>
@@ -100,10 +100,10 @@ export default function MenuPage() {
                 <a href={`https://instagram.com/${settings.instagram.replace("@", "")}`}
                   target="_blank" rel="noopener noreferrer"
                   className="px-5 py-4 flex items-center gap-3 hover:bg-white/5 transition-colors"
-                  style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
+                  style={{ borderBottom: "1px solid rgba(204,21,21,0.1)" }}>
                   <span className="text-2xl">📸</span>
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#c9a84c" }}>Instagram</p>
+                    <p className="text-xs font-semibold" style={{ color: "#cc1515" }}>Instagram</p>
                     <p className="text-sm text-gray-300 mt-0.5">{settings.instagram}</p>
                   </div>
                 </a>
@@ -113,15 +113,15 @@ export default function MenuPage() {
                   className="px-5 py-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
                   <span className="text-2xl">📍</span>
                   <div>
-                    <p className="text-xs font-semibold" style={{ color: "#c9a84c" }}>Konum</p>
+                    <p className="text-xs font-semibold" style={{ color: "#cc1515" }}>Konum</p>
                     <p className="text-sm text-gray-300 mt-0.5">Haritada Gör</p>
                   </div>
                 </a>
               )}
             </div>
 
-            <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(201,168,76,0.2)" }}>
-              <p className="text-center" style={{ color: "rgba(201,168,76,0.3)", letterSpacing: "0.4em" }}>♠ ♥ ♦ ♣</p>
+            <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(204,21,21,0.2)" }}>
+              <p className="text-center" style={{ color: "rgba(204,21,21,0.3)", letterSpacing: "0.4em" }}>♠ ♥ ♦ ♣</p>
             </div>
           </div>
         </div>
@@ -134,8 +134,8 @@ export default function MenuPage() {
           {settings.coverUrl
             ? <img src={settings.coverUrl} alt="kapak" className="w-full h-full object-cover" />
             : <div className="w-full h-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #071510 0%, #1a3d2b 100%)" }}>
-                <p style={{ color: "rgba(201,168,76,0.2)", fontSize: "4rem", letterSpacing: "0.5em" }}>♠♥♦♣</p>
+                style={{ background: "linear-gradient(135deg, #080808 0%, #222222 100%)" }}>
+                <p style={{ color: "rgba(204,21,21,0.2)", fontSize: "4rem", letterSpacing: "0.5em" }}>♠♥♦♣</p>
               </div>
           }
           {/* Gradient overlay */}
@@ -164,10 +164,10 @@ export default function MenuPage() {
         {/* Circular Logo — kapak ile içerik arası */}
         <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: 0 }}>
           <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center shadow-xl"
-            style={{ background: "white", border: "4px solid #c9a84c" }}>
+            style={{ background: "white", border: "4px solid #cc1515" }}>
             {settings.logoUrl
               ? <img src={settings.logoUrl} alt="logo" className="w-full h-full object-contain p-2" />
-              : <span style={{ fontSize: "2.5rem", color: "#c9a84c" }}>♠</span>
+              : <span style={{ fontSize: "2.5rem", color: "#cc1515" }}>♠</span>
             }
           </div>
         </div>
@@ -175,7 +175,7 @@ export default function MenuPage() {
 
       {/* İşletme adı */}
       <div className="text-center pt-3 pb-2 px-4">
-        <h1 className="text-xl font-bold" style={{ color: "#c9a84c" }}>{settings.businessName ?? "Garaj Cafe"}</h1>
+        <h1 className="text-xl font-bold" style={{ color: "#cc1515" }}>{settings.businessName ?? "Garaj Cafe"}</h1>
       </div>
 
       {/* Arama kutusu */}
@@ -184,20 +184,20 @@ export default function MenuPage() {
           <input ref={searchInputRef} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Ürün ara..."
             className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none"
-            style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(201,168,76,0.35)" }} />
+            style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(204,21,21,0.35)" }} />
         </div>
       )}
 
       {/* Sticky kategori tabları */}
-      <div className="sticky top-0 z-10 py-2" style={{ background: "#0a2015", borderBottom: "1px solid rgba(201,168,76,0.2)" }}>
+      <div className="sticky top-0 z-10 py-2" style={{ background: "#0d0d0d", borderBottom: "1px solid rgba(204,21,21,0.2)" }}>
         {!searchQuery.trim() && (
           <div className="max-w-xl mx-auto flex overflow-x-auto gap-1.5 px-4">
             {categories.map((cat) => (
               <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
                 className="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={activeCategory === cat.id
-                  ? { background: "#c9a84c", color: "#0a2015" }
-                  : { background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }
+                  ? { background: "#cc1515", color: "#ffffff" }
+                  : { background: "rgba(204,21,21,0.12)", color: "#cc1515", border: "1px solid rgba(204,21,21,0.3)" }
                 }>
                 {cat.name}
               </button>
@@ -209,7 +209,7 @@ export default function MenuPage() {
       {/* Ürünler */}
       <main className="max-w-xl mx-auto px-4 py-4 space-y-3">
         {searchQuery.trim().length > 1 && (
-          <p className="text-xs" style={{ color: "rgba(201,168,76,0.6)" }}>
+          <p className="text-xs" style={{ color: "rgba(204,21,21,0.6)" }}>
             &quot;{searchQuery}&quot; için {searchResults.length} sonuç
           </p>
         )}
@@ -220,14 +220,14 @@ export default function MenuPage() {
         )}
         {displayProducts.map((product) => (
           <div key={product.id} className="rounded-xl overflow-hidden flex fade-in"
-            style={{ background: "#132e1e", border: "1px solid rgba(201,168,76,0.25)" }}>
+            style={{ background: "#1a1a1a", border: "1px solid rgba(204,21,21,0.25)" }}>
             {product.imageUrl && (
               <img src={product.imageUrl} alt={product.name} className="w-24 h-24 object-cover flex-shrink-0" />
             )}
             <div className="p-3 flex flex-col justify-center flex-1">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-semibold text-white text-sm leading-snug">{product.name}</h3>
-                <span className="font-bold whitespace-nowrap text-sm" style={{ color: "#c9a84c" }}>
+                <span className="font-bold whitespace-nowrap text-sm" style={{ color: "#cc1515" }}>
                   {product.price.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
                 </span>
               </div>
@@ -235,14 +235,14 @@ export default function MenuPage() {
                 <p className="text-xs text-gray-400 mt-1 line-clamp-2">{product.description}</p>
               )}
               {"categoryName" in product && searchQuery.trim().length > 1 && (
-                <p className="text-xs mt-1 font-medium" style={{ color: "rgba(201,168,76,0.5)" }}>
+                <p className="text-xs mt-1 font-medium" style={{ color: "rgba(204,21,21,0.5)" }}>
                   {(product as typeof product & { categoryName: string }).categoryName}
                 </p>
               )}
             </div>
           </div>
         ))}
-        <p className="text-center py-6" style={{ color: "rgba(201,168,76,0.3)", fontSize: "1.5rem", letterSpacing: "0.5em" }}>♠ ♥ ♦ ♣</p>
+        <p className="text-center py-6" style={{ color: "rgba(204,21,21,0.3)", fontSize: "1.5rem", letterSpacing: "0.5em" }}>♠ ♥ ♦ ♣</p>
       </main>
     </div>
   );
