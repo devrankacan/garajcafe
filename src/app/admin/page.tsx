@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+
+function formatDuration(iso: string) {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 60) return `${mins}dk`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}sa ${m}dk` : `${h}sa`;
+}
 
 type OrderItem = { id: number; quantity: number; unitPrice: number; product: { name: string } };
 type Order = {
@@ -23,7 +31,7 @@ const tableStatusStyle: Record<string, { bg: string; color: string; label: strin
 const card = { background: "var(--a-card)", border: "1px solid var(--a-border)" };
 
 export default function OrdersPage() {
-  const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+  const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -43,12 +51,23 @@ export default function OrdersPage() {
 
   const fetchAll = useCallback(async () => {
     const [orders, tbls] = await Promise.all([
-      fetch("/api/orders?status=PENDING").then((r) => r.json()),
+      fetch("/api/orders?status=PENDING,APPROVED").then((r) => r.json()),
       fetch("/api/tables").then((r) => r.json()),
     ]);
-    setPendingOrders(orders);
-    setTables(tbls);
+    setActiveOrders(Array.isArray(orders) ? orders : []);
+    setTables(Array.isArray(tbls) ? tbls : []);
   }, []);
+
+  const pendingOrders = useMemo(() => activeOrders.filter((o) => o.status === "PENDING"), [activeOrders]);
+
+  const tableOpenedAt = useMemo(() => {
+    const map: Record<number, string> = {};
+    for (const o of activeOrders) {
+      const tid = o.table.id;
+      if (!map[tid] || new Date(o.createdAt) < new Date(map[tid])) map[tid] = o.createdAt;
+    }
+    return map;
+  }, [activeOrders]);
 
   useEffect(() => {
     fetchAll();
@@ -244,11 +263,17 @@ export default function OrdersPage() {
           {tables.length === 0 && <div className="rounded-xl p-6 text-center text-gray-500 text-sm" style={card}>Masa bulunamadı</div>}
           {tables.map((table) => {
             const st = tableStatusStyle[table.status] ?? tableStatusStyle.EMPTY;
+            const openedAt = tableOpenedAt[table.id];
             return (
               <button key={table.id} onClick={() => openTableModal(table)}
                 className="w-full rounded-xl p-3 flex items-center justify-between transition-all hover:brightness-125"
                 style={{ ...card, background: st.bg }}>
-                <p className="font-bold text-white text-sm">{table.name}</p>
+                <div className="text-left">
+                  <p className="font-bold text-white text-sm">{table.name}</p>
+                  {openedAt && (
+                    <p className="text-xs mt-0.5" style={{ color: st.color }}>⏱ {formatDuration(openedAt)}</p>
+                  )}
+                </div>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.3)", color: st.color }}>{st.label}</span>
               </button>
             );
