@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 
 function formatDuration(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -17,16 +17,10 @@ type Order = {
   waiter?: { name: string } | null;
   items: OrderItem[];
 };
-type Table = { id: number; name: string; status: string };
+type Table = { id: number; name: string; status: string; number: number };
 type Product = { id: number; name: string; price: number; description?: string };
 type Category = { id: number; name: string; products: Product[] };
 type CartItem = { product: Product; quantity: number };
-
-const tableStatusStyle: Record<string, { bg: string; color: string; label: string }> = {
-  EMPTY:    { bg: "rgba(34,197,94,0.08)",  color: "#4ade80", label: "Boş" },
-  OCCUPIED: { bg: "rgba(204,21,21,0.15)",  color: "#f87171", label: "Dolu" },
-  OPEN:     { bg: "rgba(234,179,8,0.08)",  color: "#facc15", label: "Açık" },
-};
 
 const card = { background: "var(--a-card)", border: "1px solid var(--a-border)" };
 
@@ -35,6 +29,13 @@ export default function OrdersPage() {
   const [tables, setTables] = useState<Table[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
+  // Floor plan
+  const [positions, setPositions] = useState<Record<number, { x: number; y: number }>>({});
+  const positionsRef = useRef<Record<number, { x: number; y: number }>>({});
+  const [editMode, setEditMode] = useState(false);
+  const [dragging, setDragging] = useState<{ tableId: number; ox: number; oy: number } | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+
   // Masa modal
   const [tableModal, setTableModal] = useState<Table | null>(null);
   const [tableOrders, setTableOrders] = useState<Order[]>([]);
@@ -42,7 +43,7 @@ export default function OrdersPage() {
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Masayı aktar modal
+  // Transfer modal
   const [transferModal, setTransferModal] = useState(false);
 
   // Kısmi tahsilat modal
@@ -69,6 +70,57 @@ export default function OrdersPage() {
     return map;
   }, [activeOrders]);
 
+  const tableTotal = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (const o of activeOrders) {
+      if (o.status === "APPROVED") map[o.table.id] = (map[o.table.id] ?? 0) + o.total;
+    }
+    return map;
+  }, [activeOrders]);
+
+  const tablePending = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (const o of activeOrders) {
+      if (o.status === "PENDING") map[o.table.id] = (map[o.table.id] ?? 0) + 1;
+    }
+    return map;
+  }, [activeOrders]);
+
+  // Load positions from localStorage when tables change
+  useEffect(() => {
+    if (tables.length === 0) return;
+    const saved: Record<number, { x: number; y: number }> = (() => {
+      try { return JSON.parse(localStorage.getItem("floorPlanPositions") ?? "{}"); } catch { return {}; }
+    })();
+    const cols = Math.max(1, Math.ceil(Math.sqrt(tables.length)));
+    const newPos: Record<number, { x: number; y: number }> = {};
+    tables.forEach((t, i) => {
+      newPos[t.id] = saved[t.id] ?? { x: 20 + (i % cols) * 160, y: 20 + Math.floor(i / cols) * 160 };
+    });
+    positionsRef.current = newPos;
+    setPositions(newPos);
+  }, [tables]);
+
+  // Global drag listeners
+  useEffect(() => {
+    if (!dragging) return;
+    function onMove(e: MouseEvent) {
+      if (!canvasRef.current) return;
+      const rect = canvasRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(rect.width - 136, e.clientX - rect.left - dragging!.ox));
+      const y = Math.max(0, Math.min(rect.height - 150, e.clientY - rect.top - dragging!.oy));
+      positionsRef.current = { ...positionsRef.current, [dragging!.tableId]: { x, y } };
+      setPositions({ ...positionsRef.current });
+    }
+    function onUp() {
+      localStorage.setItem("floorPlanPositions", JSON.stringify(positionsRef.current));
+      setDragging(null);
+    }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+  }, [dragging]);
+
   useEffect(() => {
     fetchAll();
     fetch("/api/categories").then((r) => r.json()).then((cats) => {
@@ -78,6 +130,43 @@ export default function OrdersPage() {
     const interval = setInterval(fetchAll, 5000);
     return () => clearInterval(interval);
   }, [fetchAll]);
+
+  function handleMouseDown(e: React.MouseEvent, tableId: number) {
+    if (!editMode) return;
+    e.preventDefault();
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const pos = positionsRef.current[tableId] ?? { x: 0, y: 0 };
+    setDragging({ tableId, ox: e.clientX - rect.left - pos.x, oy: e.clientY - rect.top - pos.y });
+  }
+
+  function resetFloor() {
+    localStorage.removeItem("floorPlanPositions");
+    const cols = Math.max(1, Math.ceil(Math.sqrt(tables.length)));
+    const newPos: Record<number, { x: number; y: number }> = {};
+    tables.forEach((t, i) => {
+      newPos[t.id] = { x: 20 + (i % cols) * 160, y: 20 + Math.floor(i / cols) * 160 };
+    });
+    positionsRef.current = newPos;
+    setPositions(newPos);
+  }
+
+  async function addTable() {
+    const num = tables.length > 0 ? Math.max(...tables.map((t) => t.number)) + 1 : 1;
+    await fetch("/api/tables", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ number: num, name: `Masa ${num}` }),
+    });
+    fetchAll();
+  }
+
+  async function deleteLastTable() {
+    if (tables.length === 0) return;
+    const last = tables[tables.length - 1];
+    if (!confirm(`"${last.name}" silinecek. Emin misiniz?`)) return;
+    await fetch(`/api/tables/${last.id}`, { method: "DELETE" });
+    fetchAll();
+  }
 
   async function updateStatus(orderId: number, status: string) {
     await fetch(`/api/orders/${orderId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
@@ -149,8 +238,7 @@ export default function OrdersPage() {
       fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "CLOSED", paymentMethod: method }) })
     ));
     await fetch(`/api/tables/${tableModal.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "EMPTY" }) });
-    setTableModal(null);
-    setCart([]);
+    setTableModal(null); setCart([]);
     fetchAll();
     setSaving(false);
   }
@@ -162,8 +250,7 @@ export default function OrdersPage() {
       fetch(`/api/orders/${o.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "REJECTED" }) })
     ));
     await fetch(`/api/tables/${tableModal.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "EMPTY" }) });
-    setTableModal(null);
-    setCart([]);
+    setTableModal(null); setCart([]);
     fetchAll();
   }
 
@@ -202,8 +289,7 @@ export default function OrdersPage() {
     }
     await refreshTableOrders(tableModal.id);
     fetchAll();
-    setPartialModal(false);
-    setPartialAmount("");
+    setPartialModal(false); setPartialAmount("");
     setSaving(false);
   }
 
@@ -213,72 +299,115 @@ export default function OrdersPage() {
   const activeProducts = categories.find((c) => c.id === activeCategory)?.products ?? [];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="flex flex-col" style={{ height: "calc(100vh - 140px)" }}>
 
-      {/* Bekleyen Siparişler */}
-      <div className="lg:col-span-2">
-        <h2 className="font-bold text-white mb-3">
-          Bekleyen Siparişler
-          {pendingOrders.length > 0 && <span className="ml-2 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">{pendingOrders.length}</span>}
-        </h2>
-        <div className="space-y-3">
-          {pendingOrders.length === 0 && (
-            <div className="rounded-xl p-8 text-center text-gray-500" style={card}>Bekleyen sipariş yok</div>
-          )}
-          {pendingOrders.map((order) => (
-            <div key={order.id} className="rounded-xl overflow-hidden" style={card}>
-              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--a-border2)" }}>
-                <div>
-                  <span className="font-bold text-white">{order.table.name}</span>
-                  {order.waiter && <span className="ml-2 text-xs text-gray-400">— {order.waiter.name}</span>}
-                </div>
-                <span className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</span>
-              </div>
-              <div className="px-4 py-3">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm py-0.5">
-                    <span className="text-gray-200">{item.quantity}× {item.product.name}</span>
-                    <span className="text-gray-400">{(item.quantity * item.unitPrice).toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
-                  </div>
-                ))}
-                {order.note && <p className="text-xs mt-2 rounded px-2 py-1" style={{ background: "rgba(204,21,21,0.1)", color: "#fca5a5" }}>Not: {order.note}</p>}
-                <div className="flex justify-between font-bold mt-2 pt-2 text-white" style={{ borderTop: "1px solid var(--a-border2)" }}>
-                  <span>Toplam</span>
-                  <span style={{ color: "#cc1515" }}>{order.total.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
-                </div>
-              </div>
-              <div className="flex gap-2 px-4 py-3" style={{ background: "var(--a-overlay)", borderTop: "1px solid var(--a-border2)" }}>
-                <button onClick={() => updateStatus(order.id, "APPROVED")} className="flex-1 bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-medium">Onayla</button>
-                <button onClick={() => updateStatus(order.id, "REJECTED")} className="flex-1 bg-red-700 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium">Reddet</button>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Üst toolbar */}
+      <div className="flex items-center gap-2 mb-3 flex-shrink-0">
+        <button
+          onClick={() => setEditMode((e) => !e)}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+          style={editMode
+            ? { background: "#cc1515", color: "#fff", border: "1px solid #cc1515" }
+            : { background: "var(--a-card)", color: "var(--a-text)", border: "1px solid var(--a-border)" }}>
+          {editMode ? "✓ Düzenlemeyi Bitir" : "+ Krokiyi / İsimleri Düzenle (Sürükle-Bırak)"}
+        </button>
+        {pendingOrders.length > 0 && (
+          <span className="text-xs font-bold px-2.5 py-1 rounded-full"
+            style={{ background: "rgba(234,179,8,0.15)", color: "#facc15", border: "1px solid rgba(234,179,8,0.3)" }}>
+            ⏳ {pendingOrders.length} bekleyen
+          </span>
+        )}
       </div>
 
-      {/* Tüm Masalar */}
-      <div>
-        <h2 className="font-bold text-white mb-3">Masalar</h2>
-        <div className="space-y-2">
-          {tables.length === 0 && <div className="rounded-xl p-6 text-center text-gray-500 text-sm" style={card}>Masa bulunamadı</div>}
-          {tables.map((table) => {
-            const st = tableStatusStyle[table.status] ?? tableStatusStyle.EMPTY;
-            const openedAt = tableOpenedAt[table.id];
-            return (
-              <button key={table.id} onClick={() => openTableModal(table)}
-                className="w-full rounded-xl p-3 flex items-center justify-between transition-all hover:brightness-125"
-                style={{ ...card, background: st.bg }}>
-                <div className="text-left">
-                  <p className="font-bold text-white text-sm">{table.name}</p>
-                  {openedAt && (
-                    <p className="text-xs mt-0.5" style={{ color: st.color }}>⏱ {formatDuration(openedAt)}</p>
-                  )}
+      {/* Kanvas */}
+      <div
+        ref={canvasRef}
+        className="flex-1 relative rounded-xl overflow-hidden select-none"
+        style={{
+          background: "var(--a-card)",
+          border: "1px solid var(--a-border)",
+          cursor: dragging ? "grabbing" : editMode ? "grab" : "default",
+        }}
+      >
+        {tables.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
+            Henüz masa eklenmedi
+          </div>
+        )}
+        {tables.map((table) => {
+          const pos = positions[table.id] ?? { x: 20, y: 20 };
+          const isOccupied = table.status === "OCCUPIED" || table.status === "OPEN";
+          const total = tableTotal[table.id] ?? 0;
+          const openedAt = tableOpenedAt[table.id];
+          const pending = tablePending[table.id] ?? 0;
+          return (
+            <div
+              key={table.id}
+              style={{ position: "absolute", left: pos.x, top: pos.y, width: 130, zIndex: dragging?.tableId === table.id ? 20 : 1 }}
+              onMouseDown={(e) => handleMouseDown(e, table.id)}
+            >
+              {pending > 0 && (
+                <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold z-10"
+                  style={{ background: "#facc15", color: "#111" }}>
+                  {pending}
                 </div>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.3)", color: st.color }}>{st.label}</span>
-              </button>
-            );
-          })}
-        </div>
+              )}
+              <div
+                className="rounded-xl p-3 flex flex-col items-center gap-1.5 text-center"
+                style={{
+                  background: isOccupied ? "rgba(204,21,21,0.18)" : "rgba(34,197,94,0.10)",
+                  border: `1.5px solid ${isOccupied ? "rgba(204,21,21,0.5)" : "rgba(34,197,94,0.5)"}`,
+                  cursor: editMode ? "grab" : "pointer",
+                }}
+                onClick={!editMode ? () => openTableModal(table) : undefined}
+              >
+                <svg width="28" height="22" viewBox="0 0 28 22" fill="none">
+                  <circle cx="9" cy="6" r="4" fill={isOccupied ? "#f87171" : "#4ade80"} opacity="0.9" />
+                  <circle cx="19" cy="6" r="4" fill={isOccupied ? "#f87171" : "#4ade80"} opacity="0.9" />
+                  <circle cx="14" cy="6" r="4" fill={isOccupied ? "#ef4444" : "#22c55e"} />
+                  <path d="M2 22c0-5 4-8 12-8s12 3 12 8" stroke={isOccupied ? "#f87171" : "#4ade80"} strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <p className="font-bold text-sm leading-tight" style={{ color: "var(--a-text)" }}>{table.name}</p>
+                <p className="text-xs font-semibold" style={{ color: isOccupied ? "#f87171" : "#4ade80" }}>
+                  {total.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ₺
+                </p>
+                {isOccupied && openedAt && (
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>⏱ {formatDuration(openedAt)}</p>
+                )}
+                <button
+                  className="w-full mt-0.5 py-1.5 rounded-lg text-xs font-bold"
+                  style={isOccupied
+                    ? { background: "#cc1515", color: "#fff" }
+                    : { background: "rgba(34,197,94,0.25)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.4)" }}
+                  onClick={(e) => { e.stopPropagation(); if (!editMode) openTableModal(table); }}>
+                  {isOccupied ? "Adisyonu Aç" : "Masayı Aç"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Alt toolbar */}
+      <div className="flex items-center gap-2 mt-3 flex-shrink-0">
+        <button onClick={addTable}
+          className="px-4 py-2 rounded-lg text-xs font-bold"
+          style={{ background: "#854d0e", color: "#fde68a", border: "1px solid #a16207" }}>
+          + Yeni Masa Ekle
+        </button>
+        <button onClick={deleteLastTable} disabled={tables.length === 0}
+          className="px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+          style={{ background: "var(--a-card)", color: "var(--a-text)", border: "1px solid var(--a-border)" }}>
+          — Son Masayı Sil
+        </button>
+        <button onClick={resetFloor}
+          className="px-4 py-2 rounded-lg text-xs font-semibold"
+          style={{ background: "var(--a-card)", color: "var(--a-text)", border: "1px solid var(--a-border)" }}>
+          ↺ Krokiyi Sıfırla
+        </button>
+        <span className="text-xs ml-2" style={{ color: "var(--a-text2)" }}>
+          (Şu an toplam {tables.length} masa var)
+        </span>
       </div>
 
       {/* ── POS Masa Modalı ── */}
@@ -287,7 +416,6 @@ export default function OrdersPage() {
           <div className="rounded-2xl w-full flex flex-col overflow-hidden"
             style={{ background: "var(--a-pos)", border: "1px solid var(--a-acc-border)", maxWidth: "900px", height: "min(85vh, 640px)" }}>
 
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
               style={{ background: "var(--a-card2)", borderBottom: "1px solid var(--a-border2)" }}>
               <h3 className="font-bold text-lg" style={{ color: "#cc1515" }}>{tableModal.name} Adisyonu</h3>
@@ -303,21 +431,13 @@ export default function OrdersPage() {
               </div>
             </div>
 
-            {/* Body */}
             <div className="flex flex-1 overflow-hidden">
-
-              {/* Sol: Sipariş listesi + ödeme */}
               <div className="flex flex-col flex-shrink-0 overflow-hidden"
                 style={{ width: "280px", borderRight: "1px solid var(--a-border)" }}>
-
-                {/* Sipariş başlığı */}
                 <div className="px-4 py-2.5 flex-shrink-0" style={{ borderBottom: "1px solid var(--a-border2)" }}>
                   <p className="text-xs font-semibold uppercase" style={{ color: "#cc1515" }}>≡ Sipariş Listesi</p>
                 </div>
-
-                {/* İtemler */}
                 <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-                  {/* Kaydedilmiş siparişler */}
                   {tableOrders.filter(o => o.status === "APPROVED").map((order) =>
                     order.items.map((item) => (
                       <div key={item.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{ background: "rgba(34,197,94,0.06)" }}>
@@ -329,7 +449,6 @@ export default function OrdersPage() {
                       </div>
                     ))
                   )}
-                  {/* Bekleyen siparişler */}
                   {tableOrders.filter(o => o.status === "PENDING").map((order) =>
                     order.items.map((item) => (
                       <div key={item.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{ background: "rgba(234,179,8,0.06)" }}>
@@ -341,7 +460,6 @@ export default function OrdersPage() {
                       </div>
                     ))
                   )}
-                  {/* Sepet (henüz kaydedilmemiş) */}
                   {cart.map((item) => (
                     <div key={item.product.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg" style={{ background: "rgba(204,21,21,0.08)" }}>
                       <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -357,14 +475,11 @@ export default function OrdersPage() {
                     <p className="text-xs text-gray-500 text-center py-6">Henüz ürün eklenmedi</p>
                   )}
                 </div>
-
-                {/* Toplam + butonlar */}
                 <div className="flex-shrink-0 px-3 py-3 space-y-2" style={{ borderTop: "1px solid var(--a-border)" }}>
                   <div className="flex items-center justify-between px-1">
                     <span className="text-xs font-semibold text-gray-400 uppercase">Toplam</span>
                     <span className="font-bold text-white">{grandTotal.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</span>
                   </div>
-
                   <div className="grid grid-cols-2 gap-1.5">
                     <button onClick={saveToTable} disabled={saving || cart.length === 0}
                       className="col-span-2 py-2 rounded-lg text-xs font-bold text-white disabled:opacity-40"
@@ -397,7 +512,6 @@ export default function OrdersPage() {
                       🗑 Komple İptal
                     </button>
                   </div>
-
                   <button onClick={() => { setTableModal(null); setCart([]); }}
                     className="w-full py-1.5 rounded-lg text-xs text-gray-400"
                     style={{ background: "var(--a-card2)", border: "1px solid var(--a-border2)" }}>
@@ -406,9 +520,7 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              {/* Sağ: Menü */}
               <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Kategori tabları */}
                 <div className="flex gap-1.5 overflow-x-auto px-4 py-3 flex-shrink-0"
                   style={{ borderBottom: "1px solid var(--a-border2)" }}>
                   {categories.map((cat) => (
@@ -421,8 +533,6 @@ export default function OrdersPage() {
                     </button>
                   ))}
                 </div>
-
-                {/* Ürün ızgarası */}
                 <div className="flex-1 overflow-y-auto p-4">
                   <div className="grid grid-cols-2 gap-2">
                     {activeProducts.map((product) => (
@@ -460,13 +570,15 @@ export default function OrdersPage() {
               </p>
               <div className="space-y-1.5">
                 {tables.filter((t) => t.id !== tableModal.id).map((t) => {
-                  const st = tableStatusStyle[t.status] ?? tableStatusStyle.EMPTY;
+                  const isOcc = t.status === "OCCUPIED" || t.status === "OPEN";
                   return (
                     <button key={t.id} onClick={() => transferTable(t)} disabled={saving}
                       className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:brightness-125 disabled:opacity-40"
                       style={{ background: "var(--a-card)", border: "1px solid var(--a-border2)" }}>
                       <span className="font-semibold text-white text-sm">{t.name}</span>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.4)", color: st.color }}>{st.label}</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(0,0,0,0.4)", color: isOcc ? "#f87171" : "#4ade80" }}>
+                        {isOcc ? "Dolu" : "Boş"}
+                      </span>
                     </button>
                   );
                 })}
@@ -499,9 +611,7 @@ export default function OrdersPage() {
               <div>
                 <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: "#c2410c" }}>Tahsil Edilecek Tutar (₺)</label>
                 <input
-                  type="number"
-                  value={partialAmount}
-                  onChange={(e) => setPartialAmount(e.target.value)}
+                  type="number" value={partialAmount} onChange={(e) => setPartialAmount(e.target.value)}
                   placeholder="0,00"
                   className="w-full rounded-xl px-4 py-3 text-white text-lg font-bold text-center focus:outline-none"
                   style={{ background: "var(--a-inp)", border: "1px solid rgba(194,65,12,0.4)" }}
